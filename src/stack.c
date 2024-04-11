@@ -69,13 +69,14 @@ int push(struct stack *s, taskfunc func, void *closure)
 
         pthread_cond_signal(&s->cond);
     }
-    // printf("dans push 2\n");
 
     pthread_mutex_lock(&s->lock);
     s->top++;
     s->data[s->top].func = func;
     s->data[s->top].closure = closure;
     pthread_mutex_unlock(&s->lock);
+
+    printf("top = %ld\n", s->top);
 
     return 0;
 }
