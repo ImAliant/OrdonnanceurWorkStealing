@@ -16,7 +16,7 @@ struct stack *stack_create(const size_t capacity)
 {
     struct stack *s = mmap(
         NULL,
-        sizeof(struct stack) + capacity * sizeof(void *),
+        sizeof(struct stack) + capacity * sizeof(struct task*),
         PROT_READ | PROT_WRITE,
         MAP_SHARED | MAP_ANONYMOUS,
         -1,
@@ -50,33 +50,32 @@ int is_empty(struct stack *s)
 
 int push(struct stack *s, taskfunc func, void *closure)
 {
-    //printf("dans push\n");
+    // printf("dans push\n");
     while (is_full(s) && s->is_blocking)
     {
-        //printf("dans while push\n");
+        // printf("dans while push\n");
 
         pthread_cond_wait(&s->cond, &s->lock);
     }
     if (is_full(s))
     {
-        //printf("dans is_full push\n");
+        // printf("dans is_full push\n");
 
         return 0;
     }
     if (is_empty(s))
     {
-        //printf("dans is_empty push\n");
+        // printf("dans is_empty push\n");
 
         pthread_cond_signal(&s->cond);
     }
-    //printf("dans push 2\n");
+    // printf("dans push 2\n");
 
     pthread_mutex_lock(&s->lock);
+    s->top++;
     s->data[s->top].func = func;
     s->data[s->top].closure = closure;
-    s->top++;
     pthread_mutex_unlock(&s->lock);
-
 
     return 0;
 }
@@ -85,8 +84,8 @@ struct task *pop(struct stack *s)
 {
     printf("debut pop\n");
 
-    printf("%d\n",(s == NULL));
-    
+    printf("%d\n", (s == NULL));
+
     while (is_empty(s) && s->is_blocking)
     {
         printf("dans while\n");
