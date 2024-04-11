@@ -50,7 +50,7 @@ int is_empty(struct stack *s)
 
 int push(struct stack *s, taskfunc func, void *closure)
 {
-    // printf("dans push\n");
+    printf("dans push\n");
     while (is_full(s) && s->is_blocking)
     {
         // printf("dans while push\n");
@@ -83,8 +83,6 @@ int push(struct stack *s, taskfunc func, void *closure)
 struct task *pop(struct stack *s)
 {
     printf("debut pop\n");
-
-    printf("%d\n", (s == NULL));
 
     while (is_empty(s) && s->is_blocking)
     {

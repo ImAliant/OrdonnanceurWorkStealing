@@ -6,32 +6,39 @@
 
 #include "sched.h"
 
-int
-partition(int *a, int lo, int hi)
+int partition(int *a, int lo, int hi)
 {
+    //printf("partition: %d %d\n", lo, hi);
     int pivot = a[lo];
     int i = lo - 1;
     int j = hi + 1;
     int t;
     while(1) {
+        printf("partition while\n");
         do {
+            printf("i\n");
             i++;
         } while(a[i] < pivot);
 
         do {
+            printf("j\n");
             j--;
         } while(a[j] > pivot);
 
-        if(i >= j)
+        if(i >= j) {
+            printf("return\n");
             return j;
+        }
 
         t = a[i];
         a[i] = a[j];
         a[j] = t;
     }
+    printf("fin partition\n");
 }
 
-struct quicksort_args {
+struct quicksort_args
+{
     int *a;
     int lo, hi;
 };
@@ -40,7 +47,7 @@ struct quicksort_args *
 new_args(int *a, int lo, int hi)
 {
     struct quicksort_args *args = malloc(sizeof(struct quicksort_args));
-    if(args == NULL)
+    if (args == NULL)
         return NULL;
 
     args->a = a;
@@ -49,12 +56,11 @@ new_args(int *a, int lo, int hi)
     return args;
 }
 
-void
-quicksort_serial(int *a, int lo, int hi)
+void quicksort_serial(int *a, int lo, int hi)
 {
     int p;
 
-    if(lo >= hi)
+    if (lo >= hi)
         return;
 
     p = partition(a, lo, hi);
@@ -62,10 +68,9 @@ quicksort_serial(int *a, int lo, int hi)
     quicksort_serial(a, p + 1, hi);
 }
 
-void
-quicksort(void *closure, struct scheduler *s)
+void quicksort(void *closure, struct scheduler *s)
 {
-    printf("quicksort\n");
+    //printf("quicksort\n");
     struct quicksort_args *args = (struct quicksort_args *)closure;
     int *a = args->a;
     int lo = args->lo;
@@ -74,25 +79,32 @@ quicksort(void *closure, struct scheduler *s)
     int rc;
 
     free(closure);
+    //printf("apres free\n");
 
-    if(lo >= hi)
+    if (lo >= hi)
+    {
+        printf("lo >= hi\n");
         return;
+    }
 
-    if(hi - lo <= 128) {
+    if (hi - lo <= 128)
+    {
+        printf("hi - lo <= 128\n");
+
         quicksort_serial(a, lo, hi);
         return;
     }
 
+    printf("avant partition\n");
     p = partition(a, lo, hi);
-
+    printf("appel spawn\n");
     rc = sched_spawn(quicksort, new_args(a, lo, p), s);
     assert(rc >= 0);
     rc = sched_spawn(quicksort, new_args(a, p + 1, hi), s);
     assert(rc >= 0);
 }
 
-int
-main(int argc, char **argv)
+int main(int argc, char **argv)
 {
     int *a;
     struct timespec begin, end;
@@ -102,22 +114,24 @@ main(int argc, char **argv)
     int nthreads = -1;
     int serial = 0;
 
-    while(1) {
+    while (1)
+    {
         int opt = getopt(argc, argv, "sn:t:");
-        if(opt < 0)
+        if (opt < 0)
             break;
-        switch(opt) {
+        switch (opt)
+        {
         case 's':
             serial = 1;
             break;
         case 'n':
             n = atoi(optarg);
-            if(n <= 0)
+            if (n <= 0)
                 goto usage;
             break;
         case 't':
             nthreads = atoi(optarg);
-            if(nthreads <= 0)
+            if (nthreads <= 0)
                 goto usage;
             break;
         default:
@@ -128,16 +142,20 @@ main(int argc, char **argv)
     a = malloc(n * sizeof(int));
 
     unsigned long long s = 0;
-    for(int i = 0; i < n; i++) {
+    for (int i = 0; i < n; i++)
+    {
         s = s * 6364136223846793005ULL + 1442695040888963407;
         a[i] = (int)((s >> 33) & 0x7FFFFFFF);
     }
 
     clock_gettime(CLOCK_MONOTONIC, &begin);
 
-    if(serial) {
+    if (serial)
+    {
         quicksort_serial(a, 0, n - 1);
-    } else {
+    }
+    else
+    {
         rc = sched_init(nthreads, (n + 127) / 128,
                         quicksort, new_args(a, 0, n - 1));
         assert(rc >= 0);
@@ -145,17 +163,18 @@ main(int argc, char **argv)
 
     clock_gettime(CLOCK_MONOTONIC, &end);
     delay = end.tv_sec + end.tv_nsec / 1000000000.0 -
-        (begin.tv_sec + begin.tv_nsec / 1000000000.0);
+            (begin.tv_sec + begin.tv_nsec / 1000000000.0);
     printf("Done in %lf seconds.\n", delay);
 
-    for(int i = 0; i < n - 1; i++) {
+    for (int i = 0; i < n - 1; i++)
+    {
         assert(a[i] <= a[i + 1]);
     }
 
     free(a);
     return 0;
 
- usage:
+usage:
     printf("quicksort [-n size] [-t threads] [-s]\n");
     return 1;
 }

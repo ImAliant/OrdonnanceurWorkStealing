@@ -39,7 +39,11 @@ int sched_init(int nthreads, int qlen, taskfunc f, void *closure)
     s->qlen = qlen;
     s->tasks = stack_create(qlen);
 
+    set_blocking(s->tasks, 0);
+
     push(s->tasks, f, closure);
+
+    set_blocking(s->tasks, 1);
 
     printf("size of tasks: %ld\n", stack_size(s->tasks));
 

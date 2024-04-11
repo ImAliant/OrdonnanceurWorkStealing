@@ -26,5 +26,6 @@ struct task* pop(struct stack *s);
 struct task peek(struct stack *s);
 void destroy_stack(struct stack *s);
 size_t stack_size(struct stack *s);
+void set_blocking(struct stack *s, int is_blocking);
 
 #endif
