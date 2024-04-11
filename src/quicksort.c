@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <time.h>
 #include <assert.h>
+
 #include "sched.h"
 
 int
@@ -64,6 +65,7 @@ quicksort_serial(int *a, int lo, int hi)
 void
 quicksort(void *closure, struct scheduler *s)
 {
+    printf("quicksort\n");
     struct quicksort_args *args = (struct quicksort_args *)closure;
     int *a = args->a;
     int lo = args->lo;
@@ -82,6 +84,7 @@ quicksort(void *closure, struct scheduler *s)
     }
 
     p = partition(a, lo, hi);
+
     rc = sched_spawn(quicksort, new_args(a, lo, p), s);
     assert(rc >= 0);
     rc = sched_spawn(quicksort, new_args(a, p + 1, hi), s);
