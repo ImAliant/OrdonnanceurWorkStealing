@@ -14,19 +14,19 @@ int partition(int *a, int lo, int hi)
     int j = hi + 1;
     int t;
     while(1) {
-        printf("partition while\n");
+        //printf("partition while\n");
         do {
-            printf("i\n");
+            //printf("i\n");
             i++;
         } while(a[i] < pivot);
 
         do {
-            printf("j\n");
+            //printf("j\n");
             j--;
         } while(a[j] > pivot);
 
         if(i >= j) {
-            printf("return\n");
+            //printf("return\n");
             return j;
         }
 
@@ -34,7 +34,7 @@ int partition(int *a, int lo, int hi)
         a[i] = a[j];
         a[j] = t;
     }
-    printf("fin partition\n");
+    //printf("fin partition\n");
 }
 
 struct quicksort_args
@@ -83,21 +83,21 @@ void quicksort(void *closure, struct scheduler *s)
 
     if (lo >= hi)
     {
-        printf("lo >= hi\n");
+        //printf("lo >= hi\n");
         return;
     }
 
     if (hi - lo <= 128)
     {
-        printf("hi - lo <= 128\n");
+        //printf("hi - lo <= 128\n");
 
         quicksort_serial(a, lo, hi);
         return;
     }
 
-    printf("avant partition\n");
+    //printf("avant partition\n");
     p = partition(a, lo, hi);
-    printf("appel spawn\n");
+    //printf("appel spawn\n");
     rc = sched_spawn(quicksort, new_args(a, lo, p), s);
     assert(rc >= 0);
     rc = sched_spawn(quicksort, new_args(a, p + 1, hi), s);

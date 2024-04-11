@@ -49,6 +49,8 @@ int sched_init(int nthreads, int qlen, taskfunc f, void *closure)
 
     start(s);
 
+    stop(s);
+
     return 1;
 }
 
@@ -69,6 +71,7 @@ int sched_spawn(taskfunc f, void *closure, struct scheduler *s)
 
 void *job(void *arg)
 {
+    printf("dans job\n");
     struct scheduler *s = (struct scheduler *)arg;
     while (1)
     {
@@ -112,8 +115,6 @@ void stop(struct scheduler *s)
         pthread_join(s->threads[i], NULL);
     }
     munmap(s->threads, sizeof(pthread_t) * s->nthreads);
-    destroy_stack(s->tasks);
-    munmap(s, sizeof(struct scheduler));
     destroy_stack(s->tasks);
     munmap(s, sizeof(struct scheduler));
 }
