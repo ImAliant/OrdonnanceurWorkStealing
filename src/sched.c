@@ -37,7 +37,7 @@ int sched_init(int nthreads, int qlen, taskfunc f, void *closure)
 
     s->nthreads = nthreads;
     s->qlen = qlen;
-    s->tasks = stack_create(qlen);
+    s->tasks = stack_create(s->qlen, s->nthreads);
 
     set_blocking(s->tasks, 0);
 
@@ -45,7 +45,7 @@ int sched_init(int nthreads, int qlen, taskfunc f, void *closure)
 
     set_blocking(s->tasks, 1);
 
-    printf("size of tasks: %ld\n", stack_size(s->tasks));
+    //printf("size of tasks: %ld\n", stack_size(s->tasks));
 
     start(s);
 
@@ -56,22 +56,23 @@ int sched_init(int nthreads, int qlen, taskfunc f, void *closure)
 
 int sched_spawn(taskfunc f, void *closure, struct scheduler *s)
 {
-    printf("sched_spawn\n");
+    //printf("sched_spawn\n");
     if (is_full(s->tasks))
     {
         errno = EAGAIN;
         return -1;
     }
+    //printf("debug\n");
 
     push(s->tasks, f, closure);
-    printf("pushed\n");
+    //printf("pushed\n");
 
     return 0;
 }
 
 void *job(void *arg)
 {
-    printf("dans job\n");
+    //printf("dans job\n");
     struct scheduler *s = (struct scheduler *)arg;
     while (1)
     {
@@ -79,13 +80,12 @@ void *job(void *arg)
 
         if (t == NULL)
         {
-            printf("t == NULL\n");
             break;
         }
 
         t->func(t->closure, s);
     }
-    return NULL; 
+    return NULL;
 }
 
 void start(struct scheduler *s)
@@ -104,17 +104,18 @@ void start(struct scheduler *s)
     for (int i = 0; i < s->nthreads; i++)
     {
         pthread_create(&s->threads[i], NULL, job, s);
-        printf("thread %d created\n", i);
+        //printf("thread %d created\n", i);
     }
 }
 
 void stop(struct scheduler *s)
 {
+    //printf("stop \n");
     for (int i = 0; i < s->nthreads; i++)
     {
         pthread_join(s->threads[i], NULL);
     }
     munmap(s->threads, sizeof(pthread_t) * s->nthreads);
-    destroy_stack(s->tasks);
+    // destroy_stack(s->tasks);
     munmap(s, sizeof(struct scheduler));
 }

@@ -70,7 +70,6 @@ void quicksort_serial(int *a, int lo, int hi)
 
 void quicksort(void *closure, struct scheduler *s)
 {
-    //printf("quicksort\n");
     struct quicksort_args *args = (struct quicksort_args *)closure;
     int *a = args->a;
     int lo = args->lo;
@@ -79,25 +78,19 @@ void quicksort(void *closure, struct scheduler *s)
     int rc;
 
     free(closure);
-    //printf("apres free\n");
 
     if (lo >= hi)
     {
-        //printf("lo >= hi\n");
         return;
     }
 
     if (hi - lo <= 128)
     {
-        //printf("hi - lo <= 128\n");
-
         quicksort_serial(a, lo, hi);
         return;
     }
 
-    //printf("avant partition\n");
     p = partition(a, lo, hi);
-    //printf("appel spawn\n");
     rc = sched_spawn(quicksort, new_args(a, lo, p), s);
     assert(rc >= 0);
     rc = sched_spawn(quicksort, new_args(a, p + 1, hi), s);
