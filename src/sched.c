@@ -23,17 +23,20 @@ int sched_init(int nthreads, int qlen, taskfunc f, void *closure)
         nthreads = sched_default_threads();
     }
 
-    struct scheduler *s =
+    void *scheduler_mem =
         mmap(
             NULL,
             sizeof(struct scheduler),
-            PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS,
+            PROT_READ | PROT_WRITE, 
+            MAP_PRIVATE | MAP_ANONYMOUS,
             -1, 0);
-    if (s == MAP_FAILED)
+    if (scheduler_mem == MAP_FAILED)
     {
         perror("mmap");
         return -1;
     }
+
+    struct scheduler *s = (struct scheduler *)scheduler_mem;
 
     s->nthreads = nthreads;
     s->qlen = qlen;
@@ -57,13 +60,6 @@ int sched_init(int nthreads, int qlen, taskfunc f, void *closure)
 int sched_spawn(taskfunc f, void *closure, struct scheduler *s)
 {
     //printf("sched_spawn\n");
-    if (is_full(s->tasks))
-    {
-        errno = EAGAIN;
-        return -1;
-    }
-    //printf("debug\n");
-
     push(s->tasks, f, closure);
     //printf("pushed\n");
 
@@ -116,6 +112,6 @@ void stop(struct scheduler *s)
         pthread_join(s->threads[i], NULL);
     }
     munmap(s->threads, sizeof(pthread_t) * s->nthreads);
-    // destroy_stack(s->tasks);
+    destroy_stack(s->tasks);
     munmap(s, sizeof(struct scheduler));
 }

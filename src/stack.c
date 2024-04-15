@@ -16,29 +16,32 @@ void set_blocking(struct stack *s, int is_blocking)
 
 struct stack *stack_create(const size_t capacity, const int nthreads)
 {
-    struct stack *s = mmap(
+    void *stack_mem = mmap(
         NULL,
-        sizeof(struct stack) + capacity * sizeof(struct task *),
+        sizeof(struct stack) + capacity * sizeof(struct task),
         PROT_READ | PROT_WRITE,
-        MAP_SHARED | MAP_ANONYMOUS,
+        MAP_PRIVATE | MAP_ANONYMOUS,
         -1,
         0);
-    if (s == MAP_FAILED)
+    if (stack_mem == MAP_FAILED)
     {
         perror("mmap");
         return NULL;
     }
 
-    s->data = (struct task *)(s + 1);
+    struct stack *s = (struct stack *)stack_mem;
+
+    s->data = (struct task *)(stack_mem + sizeof(struct stack));
     s->capacity = capacity;
     s->waiting_threads = 0;
     s->nthreads = nthreads;
     s->top = -1;
+    
     pthread_mutex_init(&s->lock, NULL);
     pthread_cond_init(&s->cond_full, NULL);
     pthread_cond_init(&s->cond_empty, NULL);
 
-    set_blocking(s, 1);
+    set_blocking(s, 0);     
 
     return s;
 }
@@ -143,8 +146,8 @@ struct task *peek(struct stack *s)
 
 void destroy_stack(struct stack *s)
 {
-    munmap(s, sizeof(struct stack) + s->capacity * sizeof(struct task *));
     pthread_mutex_destroy(&s->lock);
+    munmap(s, sizeof(struct stack) + s->capacity * sizeof(struct task));
 }
 
 size_t stack_size(struct stack *s)
