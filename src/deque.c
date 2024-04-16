@@ -54,6 +54,7 @@ void deque_destroy(struct deque *d)
 
 void deque_push_front(struct deque *d, struct task *task)
 {
+    printf("push front pthread id: %ld\n", pthread_self());
     pthread_mutex_lock(&d->lock);
 
     if (deque_full(d)) {
@@ -90,6 +91,7 @@ void deque_push_front(struct deque *d, struct task *task)
 
 void deque_push_rear(struct deque *d, struct task *task)
 {
+    printf("push rear pthread id: %ld\n", pthread_self());
     pthread_mutex_lock(&d->lock);
 
     if (deque_full(d)) {
@@ -126,6 +128,7 @@ void deque_push_rear(struct deque *d, struct task *task)
 
 Node *deque_pop_front(struct deque *d)
 {
+    printf("pop front pthread id: %ld\n", pthread_self());
     pthread_mutex_lock(&d->lock);
 
     if (deque_empty(d)) {
@@ -149,6 +152,8 @@ Node *deque_pop_front(struct deque *d)
 
 Node *deque_pop_rear(struct deque *d)
 {
+    printf("pop rear pthread id: %ld\n", pthread_self());
+
     if (deque_empty(d)) {
         printf("Can't pop from empty deque\n");
         return NULL;
@@ -167,16 +172,21 @@ Node *deque_pop_rear(struct deque *d)
 
 int deque_full(struct deque *d)
 {
+    printf("full pthread id: %ld\n", pthread_self());
     return d->size == d->capacity;
 }
 
 int deque_empty(struct deque *d)
 {
-    printf("deque_empty\n");
+    printf("empty pthread id: %ld\n", pthread_self());
     if (!d){
         printf("deque is NULL\n");
         return 1;
     }
+    if (d->size == 0) {
+        printf("vide\n");
+    }
+    else printf("pas vide\n");
     return d->size == 0;
 }
 
