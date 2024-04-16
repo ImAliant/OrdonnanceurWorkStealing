@@ -47,7 +47,7 @@ void *job(void *arg)
 
     while (1)
     {
-        printf("thread %ld\n", pthread_self());
+        printf("while job thread %ld\n", pthread_self());
         // work stealing
         if (deque_empty(s->threads[index].deque))
         {
@@ -108,7 +108,8 @@ int work_stealing(struct scheduler *s, int index)
     printf("avant while\n");
     while (k != k_initial || first_iteration)
     {
-        first_iteration = 0;
+        if (first_iteration)
+            first_iteration = 0;
         printf("avant pop front node\n");
         Node *node = deque_pop_front(s->threads[k].deque);
         printf("apres pop front node\n");

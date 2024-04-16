@@ -56,9 +56,11 @@ void deque_push_front(struct deque *d, struct task *task)
 {
     printf("push front pthread id: %ld\n", pthread_self());
     pthread_mutex_lock(&d->lock);
+    printf("apres lock push front pthread id: %ld\n", pthread_self());
 
     if (deque_full(d)) {
         printf("Can't push to full deque\n");
+        pthread_mutex_unlock(&d->lock);
         return;
     }
 
@@ -93,9 +95,11 @@ void deque_push_rear(struct deque *d, struct task *task)
 {
     printf("push rear pthread id: %ld\n", pthread_self());
     pthread_mutex_lock(&d->lock);
+    printf("apres lock push rear pthread id: %ld\n", pthread_self());
 
     if (deque_full(d)) {
         printf("Can't push to full deque\n");
+        pthread_mutex_unlock(&d->lock);
         return;
     }
     
@@ -130,9 +134,11 @@ Node *deque_pop_front(struct deque *d)
 {
     printf("pop front pthread id: %ld\n", pthread_self());
     pthread_mutex_lock(&d->lock);
+    printf("apres lock pop front pthread id: %ld\n", pthread_self());
 
     if (deque_empty(d)) {
         printf("Can't pop from empty deque\n");
+        pthread_mutex_unlock(&d->lock);
         return NULL;
     }
 
@@ -179,6 +185,7 @@ int deque_full(struct deque *d)
 int deque_empty(struct deque *d)
 {
     printf("empty pthread id: %ld\n", pthread_self());
+    
     if (!d){
         printf("deque is NULL\n");
         return 1;
