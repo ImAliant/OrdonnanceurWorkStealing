@@ -30,7 +30,9 @@ int main(int argc, char **argv)
     deque_destroy(deque);
     printf("deque destroyed\n"); */
 
-    sched_init(-1, 10, test, NULL);
+    int nthreads = 2;
+    int qlen = 10;
+    sched_init(nthreads, qlen, test, NULL);
     
 
     return EXIT_SUCCESS;

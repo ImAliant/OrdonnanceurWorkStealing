@@ -26,11 +26,17 @@ struct scheduler {
 
 void *job(void *arg) {
     struct job_args *args = (struct job_args *)arg;
-    free(args);
+    if (args == NULL) {
+        return NULL;
+    }
+    struct scheduler *s = args->s;
+    const int index = args->index;
 
-    /* while (1) {
+    free(arg);
+
+    while (1) {
         // Work stealing
-        if (deque_empty(s->threads[index].deque)) {
+        /* if (deque_empty(s->threads[index].deque)) {
             srand(time(NULL));
             int k = rand() % s->nthreads;
             if (k == index) {
@@ -49,16 +55,24 @@ void *job(void *arg) {
 
             t->func(t->closure, s);
         }
-        else {
-            struct task *t = deque_pop_rear(s->threads[index].deque)->task;
+        else { */
+            printf("avant node\n");
+            Node* node = deque_pop_rear(s->threads[index].deque);
+            if (node == NULL) {
+                break;
+            }
+
+            struct task *t = node->task;
+            free(node);
+            
             if (t == NULL) {
                 // peut etre erreur
                 continue;
             }
 
             t->func(t->closure, s);
-        }
-    } */
+        //}
+    }
 
     return NULL;
 }
@@ -136,9 +150,9 @@ int sched_spawn(taskfunc f, void *closure, struct scheduler *s){
 }
 
 int sched_stop(struct scheduler *s){
-    /* for (int i = 0; i < s->nthreads; i++) {
+    for (int i = 0; i < s->nthreads; i++) {
         pthread_join(s->threads[i].thread, NULL);
-    } */
+    }
 
     for (int i = 0; i < s->nthreads; i++) {
         deque_destroy(s->threads[i].deque);

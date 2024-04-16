@@ -123,10 +123,11 @@ Node *deque_pop_front(struct deque *d)
 
     Node *node = d->front;
     Node *new_front = d->front->next;
-    free(d->front);
 
     d->front = new_front;
-    d->front->prev = NULL;
+    if(d->front) {
+        d->front->prev = NULL;
+    }
     d->size--;
     
     return node;
@@ -141,10 +142,10 @@ Node *deque_pop_rear(struct deque *d)
 
     Node *node = d->rear;
     Node *new_rear = d->rear->prev;
-    free(d->rear);
-
     d->rear = new_rear;
-    d->rear->next = NULL;
+    if (d->rear){
+        d->rear->next = NULL;
+    }
     d->size--;
     
     return node;
