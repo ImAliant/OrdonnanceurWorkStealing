@@ -26,6 +26,8 @@ struct deque *deque_create(const size_t capacity)
     d->front = NULL;
     d->rear = NULL;
 
+    pthread_mutex_init(&d->lock, NULL);
+
     return d;
 }
 
@@ -46,16 +48,18 @@ void deque_destroy(struct deque *d)
     free(tmp);
     
     munmap:
+    pthread_mutex_destroy(&d->lock);
     munmap(d, sizeof(struct deque) + d->capacity * (sizeof(Node)));
 }
 
 void deque_push_front(struct deque *d, struct task *task)
 {
+    pthread_mutex_lock(&d->lock);
+
     if (deque_full(d)) {
         printf("Can't push to full deque\n");
         return;
     }
-        
 
     Node *new_node = malloc(sizeof(Node));
     if (!new_node)
@@ -80,10 +84,14 @@ void deque_push_front(struct deque *d, struct task *task)
     d->front = new_node;
 
     d->size++;
+
+    pthread_mutex_unlock(&d->lock);
 }
 
 void deque_push_rear(struct deque *d, struct task *task)
 {
+    pthread_mutex_lock(&d->lock);
+
     if (deque_full(d)) {
         printf("Can't push to full deque\n");
         return;
@@ -112,10 +120,14 @@ void deque_push_rear(struct deque *d, struct task *task)
     d->rear = new_node;
 
     d->size++;
+
+    pthread_mutex_unlock(&d->lock);
 }
 
 Node *deque_pop_front(struct deque *d)
 {
+    pthread_mutex_lock(&d->lock);
+
     if (deque_empty(d)) {
         printf("Can't pop from empty deque\n");
         return NULL;
@@ -129,6 +141,8 @@ Node *deque_pop_front(struct deque *d)
         d->front->prev = NULL;
     }
     d->size--;
+
+    pthread_mutex_unlock(&d->lock);
     
     return node;
 }
@@ -158,6 +172,11 @@ int deque_full(struct deque *d)
 
 int deque_empty(struct deque *d)
 {
+    printf("deque_empty\n");
+    if (!d){
+        printf("deque is NULL\n");
+        return 1;
+    }
     return d->size == 0;
 }
 

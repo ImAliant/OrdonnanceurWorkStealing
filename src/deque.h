@@ -1,5 +1,7 @@
 #include "sched.h"
 
+#include <pthread.h>
+
 struct task {
     taskfunc func;
     void *closure;
@@ -16,6 +18,7 @@ struct deque {
     size_t size;
     Node* front;
     Node* rear;
+    pthread_mutex_t lock;
 };
 
 struct deque *deque_create(const size_t capacity);
