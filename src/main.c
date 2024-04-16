@@ -34,6 +34,5 @@ int main(int argc, char **argv)
     int qlen = 10;
     sched_init(nthreads, qlen, test, NULL);
     
-
     return EXIT_SUCCESS;
 }

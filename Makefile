@@ -13,7 +13,7 @@ test: scheduler_test
 
 scheduler_debug : $(QUICKSORT) $(SCHED)
 	$(CC) $(CFLAGS) $(DEBUG) -o scheduler $^
-scheduler: $(QUICKSORT) $(SCHED)
+scheduler: $(QUICKSORT) $(DEQUE) $(SCHED)
 	$(CC) $(CFLAGS) -o $@ $^
 scheduler_test_debug: $(TEST) $(DEQUE) $(SCHED)
 	$(CC) $(CFLAGS) $(DEBUG) -o scheduler_test $^
