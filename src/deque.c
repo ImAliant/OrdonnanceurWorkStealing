@@ -43,7 +43,7 @@ void deque_destroy(struct deque *d)
     munmap(d, sizeof(struct deque) + d->capacity * (sizeof(Node)));
 }
 
-void deque_push_front(struct deque *d, int value)
+void deque_push_front(struct deque *d, struct task task)
 {
     if (deque_full(d)) {
         printf("Can't push to full deque\n");
@@ -57,7 +57,7 @@ void deque_push_front(struct deque *d, int value)
         perror("malloc");
         return;
     }
-    new_node->data = value;
+    new_node->task = task;
     new_node->prev = NULL;
 
     if (deque_empty(d))
@@ -76,7 +76,7 @@ void deque_push_front(struct deque *d, int value)
     d->size++;
 }
 
-void deque_push_rear(struct deque *d, int value)
+void deque_push_rear(struct deque *d, struct task task)
 {
     if (deque_full(d)) {
         printf("Can't push to full deque\n");
@@ -89,7 +89,7 @@ void deque_push_rear(struct deque *d, int value)
         perror("malloc");
         return;
     }
-    new_node->data = value;
+    new_node->task = task;
     new_node->next = NULL;
     
     if (deque_empty(d))
@@ -154,7 +154,7 @@ int deque_empty(struct deque *d)
     return d->size == 0;
 }
 
-void deque_print(struct deque *d)
+/* void deque_print(struct deque *d)
 {
     Node *tmp = d->front;
     while (tmp->next)
@@ -163,4 +163,4 @@ void deque_print(struct deque *d)
         tmp = tmp->next;
     }
     printf("%d\n", tmp->data);
-}
+} */

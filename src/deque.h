@@ -6,7 +6,7 @@ struct task {
 };
 
 typedef struct Node {
-    int data;
+    struct task task;
     struct Node* next;
     struct Node* prev;
 } Node;
@@ -20,10 +20,10 @@ struct deque {
 
 struct deque *deque_create(const size_t capacity);
 void deque_destroy(struct deque *d);
-void deque_push_front(struct deque *d, int value);
-void deque_push_rear(struct deque *d, int value);
+void deque_push_front(struct deque *d, struct task task);
+void deque_push_rear(struct deque *d, struct task task);
 Node* deque_pop_front(struct deque *d);
 Node* deque_pop_rear(struct deque *d);
 int deque_full(struct deque *d);
 int deque_empty(struct deque *d);
-void deque_print(struct deque *d);
+/* void deque_print(struct deque *d); */

@@ -30,7 +30,7 @@ int main(int argc, char **argv)
     deque_destroy(deque);
     printf("deque destroyed\n"); */
 
-    sched_init(4, 10, test, NULL);
+    sched_init(1, 10, test, NULL);
 
     return EXIT_SUCCESS;
 }

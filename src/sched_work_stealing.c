@@ -50,12 +50,19 @@ int sched_init(int nthreads, int qlen, taskfunc f, void *closure){
         }
     }
 
-    // TODO
-
-    munmap(scheduler_mem, sizeof(struct scheduler) + nthreads * sizeof(struct pthread_deque));
-
     return 0;
 }
+
 int sched_spawn(taskfunc f, void *closure, struct scheduler *s){
     return 1;
+}
+
+int stop(struct scheduler *s){
+    for (int i = 0; i < s->nthreads; i++) {
+        deque_destroy(s->threads[i].deque);
+    }
+
+    munmap(s, sizeof(struct scheduler) + s->nthreads * sizeof(struct pthread_deque));
+
+    return 0;
 }
