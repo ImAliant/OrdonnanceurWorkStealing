@@ -30,20 +30,26 @@ struct deque *deque_create(const size_t capacity)
 }
 
 void deque_destroy(struct deque *d)
-{
+{   
+    if(deque_empty(d)) goto munmap;
+
     Node *tmp = d->front;
+
     while (tmp->next)
     {
         Node *next = tmp->next;
+        free(tmp->task);
         free(tmp);
         tmp = next;
     }
+    free(tmp->task);
     free(tmp);
-
+    
+    munmap:
     munmap(d, sizeof(struct deque) + d->capacity * (sizeof(Node)));
 }
 
-void deque_push_front(struct deque *d, struct task task)
+void deque_push_front(struct deque *d, struct task *task)
 {
     if (deque_full(d)) {
         printf("Can't push to full deque\n");
@@ -76,7 +82,7 @@ void deque_push_front(struct deque *d, struct task task)
     d->size++;
 }
 
-void deque_push_rear(struct deque *d, struct task task)
+void deque_push_rear(struct deque *d, struct task *task)
 {
     if (deque_full(d)) {
         printf("Can't push to full deque\n");
