@@ -1,11 +1,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "sched.h"
 #include "deque.h"
+
+void test(void *closure, struct scheduler *s)
+{
+    printf("test\n");
+}
 
 int main(int argc, char **argv)
 {
-    struct deque *deque = deque_create(10);
+    /* struct deque *deque = deque_create(10);
 
     printf("capacity: %ld\n", deque->capacity);
 
@@ -22,7 +28,9 @@ int main(int argc, char **argv)
     deque_print(deque);
 
     deque_destroy(deque);
-    printf("deque destroyed\n");
+    printf("deque destroyed\n"); */
+
+    sched_init(4, 10, test, NULL);
 
     return EXIT_SUCCESS;
 }
