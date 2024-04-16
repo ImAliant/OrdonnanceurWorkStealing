@@ -17,10 +17,12 @@ int main(int argc, char **argv)
     printf("size: %ld\n", deque->size);
     deque_pop_front(deque);
     deque_pop_rear(deque);
+    printf("size: %ld\n", deque->size);
 
     deque_print(deque);
 
     deque_destroy(deque);
+    printf("deque destroyed\n");
 
     return EXIT_SUCCESS;
 }

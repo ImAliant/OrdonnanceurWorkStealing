@@ -31,14 +31,25 @@ struct deque *deque_create(const size_t capacity)
 
 void deque_destroy(struct deque *d)
 {
-    // destroy nodes
+    Node *tmp = d->front;
+    while (tmp->next)
+    {
+        Node *next = tmp->next;
+        free(tmp);
+        tmp = next;
+    }
+    free(tmp);
+
     munmap(d, sizeof(struct deque) + d->capacity * (sizeof(Node)));
 }
 
 void deque_push_front(struct deque *d, int value)
 {
-    if (deque_full(d))
+    if (deque_full(d)) {
+        printf("Can't push to full deque\n");
         return;
+    }
+        
 
     Node *new_node = malloc(sizeof(Node));
     if (!new_node)
@@ -67,8 +78,10 @@ void deque_push_front(struct deque *d, int value)
 
 void deque_push_rear(struct deque *d, int value)
 {
-    if (deque_full(d))
+    if (deque_full(d)) {
+        printf("Can't push to full deque\n");
         return;
+    }
     
     Node *new_node = malloc(sizeof(Node));
     if (!new_node)
@@ -98,6 +111,7 @@ void deque_push_rear(struct deque *d, int value)
 Node *deque_pop_front(struct deque *d)
 {
     if (deque_empty(d)) {
+        printf("Can't pop from empty deque\n");
         return NULL;
     }
 
@@ -115,6 +129,7 @@ Node *deque_pop_front(struct deque *d)
 Node *deque_pop_rear(struct deque *d)
 {
     if (deque_empty(d)) {
+        printf("Can't pop from empty deque\n");
         return NULL;
     }
 
