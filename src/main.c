@@ -2,37 +2,43 @@
 #include <stdlib.h>
 
 #include "sched.h"
-#include "deque.h"
+#include "deque_test.h"
 
 void test(void *closure, struct scheduler *s)
 {
     printf("test\n");
 }
 
+void deque_caracteristics(struct deque *d)
+{
+    printf("capacity: %ld\n", d->capacity);
+    printf("size: %ld\n", d->size);
+    printf("front: %p\n", d->front);
+    printf("rear: %p\n", d->rear);
+
+    deque_print(d);
+}
+
 int main(int argc, char **argv)
 {
-    /* struct deque *deque = deque_create(10);
+    struct deque *deque = deque_create(10);
 
-    printf("capacity: %ld\n", deque->capacity);
+    deque_caracteristics(deque);
 
     deque_push_front(deque, 22);
-    printf("size: %ld\n", deque->size);
+    deque_caracteristics(deque);
+
     deque_push_rear(deque, 45);
-    printf("size: %ld\n", deque->size);
+    deque_caracteristics(deque);
+
     deque_push_front(deque, 60);
-    printf("size: %ld\n", deque->size);
+    deque_caracteristics(deque);
+
     deque_pop_front(deque);
     deque_pop_rear(deque);
-    printf("size: %ld\n", deque->size);
-
-    deque_print(deque);
+    deque_caracteristics(deque);
 
     deque_destroy(deque);
-    printf("deque destroyed\n"); */
-
-    int nthreads = 2;
-    int qlen = 10;
-    sched_init(nthreads, qlen, test, NULL);
     
     return EXIT_SUCCESS;
 }
