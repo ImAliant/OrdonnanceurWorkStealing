@@ -1,4 +1,5 @@
 #include "deque.h"
+#include "mmap_utils.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -6,19 +7,11 @@
 
 Node *create_node(struct task *task)
 {
-    void *node_mem = mmap(
-        NULL,
+    void *node_mem = do_mmap(
         sizeof(Node),
         PROT_READ | PROT_WRITE,
-        MAP_PRIVATE | MAP_ANONYMOUS,
-        -1,
-        0
+        MAP_PRIVATE | MAP_ANONYMOUS
     );
-    if (node_mem == MAP_FAILED)
-    {
-        perror("mmap");
-        return NULL;
-    }
 
     Node *new_node = (Node *)node_mem;
 
@@ -45,18 +38,11 @@ struct task *create_task(taskfunc f, void *closure) {
 
 struct deque *deque_create(const size_t capacity)
 {
-    void *deque_mem = mmap(
-        NULL,
+    void *deque_mem = do_mmap(
         sizeof(struct deque),
         PROT_READ | PROT_WRITE,
-        MAP_PRIVATE | MAP_ANONYMOUS,
-        -1,
-        0);
-    if (deque_mem == MAP_FAILED)
-    {
-        perror("mmap");
-        return NULL;
-    }
+        MAP_PRIVATE | MAP_ANONYMOUS
+    );
 
     struct deque *d = (struct deque *)deque_mem;
 
@@ -149,6 +135,12 @@ void deque_push_rear(struct deque *d, struct task *task)
 Node *deque_pop_front(struct deque *d)
 {
     //printf("pop front pthread id: %ld\n", pthread_self());
+    if (!d)
+    {
+        perror("error: deque is NULL");
+        exit(EXIT_FAILURE);
+    }
+
     pthread_mutex_lock(&d->lock);
 
     if (d->front == NULL) // deque is empty
