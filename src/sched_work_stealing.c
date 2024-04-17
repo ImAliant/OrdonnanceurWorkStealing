@@ -118,39 +118,6 @@ void *job(void *arg)
 
     while (1)
     {
-        // printf("while job thread %ld\n", pthread_self());
-
-        //  work stealing
-        // if (deque_empty(s->threads[index].deque))
-        //{
-        /* int need_sleep = sched_work_stealing(s, index);
-        if (need_sleep)
-        {
-            pthread_mutex_lock(&s->mutex);
-            s->asleep_threads++;
-            printf("threads asleep: %ld\n", s->asleep_threads);
-            if (s->asleep_threads == s->nthreads)
-            {
-                printf("all threads are asleep\n");
-                pthread_mutex_unlock(&s->mutex);
-                break;
-            }
-            pthread_mutex_unlock(&s->mutex);
-
-            usleep(1000);
-
-            pthread_mutex_lock(&s->mutex);
-            s->asleep_threads--;
-            pthread_mutex_unlock(&s->mutex);
-
-            //continue;
-        } */
-        //}
-        // normal
-        /*else
-        {
-            sched_normal_pop(s, index);
-        }*/
         if (s->break_all)
         {
             break;
@@ -182,7 +149,7 @@ void *job(void *arg)
             sched_normal_pop(s, index);
         }
 
-        deque_print_caracteristics(s->threads[index].deque);
+        //deque_print_caracteristics(s->threads[index].deque);
     }
 
     return NULL;
@@ -195,65 +162,9 @@ int increment_k(int k, int nthreads)
 
 int sched_work_stealing(struct scheduler *s, const int index)
 {
-    /* printf("work stealing pthread id: %ld\n", pthread_self());
-    srand(time(NULL));
-    size_t k_initial = rand() % s->nthreads;
-    printf("k initial %ld\n", k_initial);
-    if (k_initial == index)
-    {
-        // if k == index, we iterate to k+1 modulo nthreads
-        k_initial = increment_k(k_initial, s->nthreads);
-    }
-    size_t k = k_initial;
-    int first_iteration = 1;
-    //
-    int already_printed = 0;
-
-    // printf("avant while\n");
-    while (k != k_initial || first_iteration)
-    {
-        printf("k %ld\n", k);
-
-        if (first_iteration)
-            first_iteration = 0;
-
-        //
-        if (!already_printed) {
-            deque_print_caracteristics(s->threads[k].deque);
-            already_printed = 1;
-        }
-        //
-        Node *node = deque_pop_front(s->threads[k].deque);
-        if (node == NULL)
-        {
-            k = increment_k(k, s->nthreads);
-            continue;
-        }
-
-        if (is_smt_task_full(s)) return 1;
-
-        //increment_smt_task(s);
-
-        struct task *t = node->task;
-        munmap(node, sizeof(Node));
-
-        t->func(t->closure, s);
-
-        //deque_push_rear(s->threads[index].deque, t);
-
-        //decrement_smt_task(s);
-
-        return 0;
-    }
-    // printf("apres while\n");
-
-    return 1; */
-    printf("sched work stealing: %ld\n", pthread_self());
-
     // TODO petite fonction pour generer un k random
     srand(time(NULL));
     size_t k_initial = rand() % s->nthreads;
-    printf("k_initial %ld\n", k_initial);
     if (k_initial == index)
     {
         k_initial = increment_k(k_initial, s->nthreads);
@@ -291,15 +202,11 @@ int sched_work_stealing(struct scheduler *s, const int index)
 
 int sched_normal_pop(struct scheduler *s, const int index)
 {
-    printf("sched normal pop pthread id: %ld\n", pthread_self());
-    printf("index %d\n", index);
-
     Node *node = deque_pop_rear(s->threads[index].deque);
     if (node == NULL)
     {
         perror("node ne peut pas être null");
-        // exit(EXIT_FAILURE);
-        return 1;
+        exit(EXIT_FAILURE);
     }
 
     struct task *t = node->task;
@@ -308,8 +215,7 @@ int sched_normal_pop(struct scheduler *s, const int index)
     if (t == NULL)
     {
         perror("task can't be null");
-        /* exit(EXIT_FAILURE); */
-        return 1;
+        exit(EXIT_FAILURE);
     }
 
     t->func(t->closure, s);
@@ -319,7 +225,6 @@ int sched_normal_pop(struct scheduler *s, const int index)
 
 int sched_init(int nthreads, int qlen, taskfunc f, void *closure)
 {
-    // printf("sched init pthread id: %ld\n", pthread_self());
     if (nthreads == -1)
     {
         nthreads = sched_default_threads();
@@ -336,8 +241,6 @@ int sched_init(int nthreads, int qlen, taskfunc f, void *closure)
 
 int sched_init_threads(struct scheduler *s, taskfunc f, void *closure)
 {
-    // printf("sched init threads pthread id: %ld\n", pthread_self());
-
     const size_t index_dep = 0;
     s->threads[index_dep].deque = deque_create();
     if (!s->threads[index_dep].deque)
@@ -347,8 +250,6 @@ int sched_init_threads(struct scheduler *s, taskfunc f, void *closure)
     }
     struct task *task = create_task(f, closure);
     deque_push_rear(s->threads[index_dep].deque, task);
-    printf("deque initial\n");
-    deque_print_caracteristics(s->threads[index_dep].deque);
 
     sched_init_deque(s, index_dep);
 
@@ -395,7 +296,6 @@ int sched_launch_pthread(struct scheduler *s)
 
 int sched_find_thread(struct scheduler *s)
 {
-    // printf("find thread pthread id: %ld\n", pthread_self());
     int index = -1;
     for (int i = 0; i < s->nthreads; i++)
     {
@@ -411,7 +311,6 @@ int sched_find_thread(struct scheduler *s)
 
 int sched_spawn(taskfunc f, void *closure, struct scheduler *s)
 {
-    printf("sched spawn pthread id: %ld\n", pthread_self());
     struct task *task = malloc(sizeof(struct task));
     if (!task)
     {
@@ -420,8 +319,6 @@ int sched_spawn(taskfunc f, void *closure, struct scheduler *s)
     task->func = f;
     task->closure = closure;
 
-    printf("apres alloc task\n");
-
     int index_thread = sched_find_thread(s);
     if (index_thread == -1)
     {
@@ -429,14 +326,11 @@ int sched_spawn(taskfunc f, void *closure, struct scheduler *s)
         return 1;
     }
 
-    printf("avant test smt\n");
     if (is_smt_task_full(s))
     {
         perror("too much task at the same time");
         return 1;
     }
-
-    printf("apres test smt\n");
 
     increment_smt_task(s);
     deque_push_rear(s->threads[index_thread].deque, task);
@@ -447,7 +341,6 @@ int sched_spawn(taskfunc f, void *closure, struct scheduler *s)
 
 int sched_stop(struct scheduler *s)
 {
-    // printf("sched stop\n");
     for (int i = 0; i < s->nthreads; i++)
     {
         pthread_join(s->threads[i].thread, NULL);
