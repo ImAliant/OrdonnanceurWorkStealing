@@ -36,7 +36,7 @@ struct task *create_task(taskfunc f, void *closure) {
     return t;
 }
 
-struct deque *deque_create(const size_t capacity)
+struct deque *deque_create()
 {
     void *deque_mem = do_mmap(
         sizeof(struct deque),
@@ -46,7 +46,6 @@ struct deque *deque_create(const size_t capacity)
 
     struct deque *d = (struct deque *)deque_mem;
 
-    d->capacity = capacity;
     d->size = 0;
     d->front = NULL;
     d->rear = NULL;
@@ -78,12 +77,6 @@ void deque_push_front(struct deque *d, struct task *task)
     //printf("push front pthread id: %ld\n", pthread_self());
     pthread_mutex_lock(&d->lock);
 
-    if (deque_full(d))
-    {
-        pthread_mutex_unlock(&d->lock);
-        return;
-    }
-
     Node *new_node = create_node(task);
     if (d->front == NULL) 
     {
@@ -99,6 +92,9 @@ void deque_push_front(struct deque *d, struct task *task)
 
     d->size++;
 
+    /* printf("push front\n");
+    deque_print_caracteristics(d); */
+
     pthread_mutex_unlock(&d->lock);
 }
 
@@ -106,12 +102,6 @@ void deque_push_rear(struct deque *d, struct task *task)
 {
     //printf("push rear pthread id: %ld\n", pthread_self());
     pthread_mutex_lock(&d->lock);
-
-    if (deque_full(d))
-    {
-        pthread_mutex_unlock(&d->lock);
-        return;
-    }
 
     Node *new_node = create_node(task);
 
@@ -128,6 +118,9 @@ void deque_push_rear(struct deque *d, struct task *task)
     }
 
     d->size++;
+
+    /* printf("push rear\n");
+    deque_print_caracteristics(d); */
 
     pthread_mutex_unlock(&d->lock);
 }
@@ -163,6 +156,9 @@ Node *deque_pop_front(struct deque *d)
     }
     d->size--;
 
+    /* printf("pop front\n");
+    deque_print_caracteristics(d); */
+
     pthread_mutex_unlock(&d->lock);
 
     return node;
@@ -171,6 +167,8 @@ Node *deque_pop_front(struct deque *d)
 Node *deque_pop_rear(struct deque *d)
 {
     //printf("pop rear pthread id: %ld\n", pthread_self());
+
+    pthread_mutex_lock(&d->lock);
 
     if (d->rear == NULL) // deque is empty
     {
@@ -190,13 +188,14 @@ Node *deque_pop_rear(struct deque *d)
         d->rear->next = NULL;
     }
 
-    return node;
-}
+    d->size--;
 
-int deque_full(struct deque *d)
-{
-    //printf("full pthread id: %ld\n", pthread_self());
-    return d->size == d->capacity;
+    /* printf("pop rear\n");
+    deque_print_caracteristics(d); */
+
+    pthread_mutex_unlock(&d->lock);
+
+    return node;
 }
 
 int deque_empty(struct deque *d)
@@ -210,4 +209,12 @@ int deque_empty(struct deque *d)
     }
     
     return d->size == 0;
+}
+
+void deque_print_caracteristics(struct deque *d)
+{
+    printf("deque %p\n", d);
+    printf("size: %zu\n", d->size);
+    printf("front: %p\n", d->front);
+    printf("rear: %p\n", d->rear);
 }
