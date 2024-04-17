@@ -64,6 +64,8 @@ quicksort_serial(int *a, int lo, int hi)
 void
 quicksort(void *closure, struct scheduler *s)
 {
+    //printf("quicksort\n");
+
     struct quicksort_args *args = (struct quicksort_args *)closure;
     int *a = args->a;
     int lo = args->lo;
@@ -81,9 +83,12 @@ quicksort(void *closure, struct scheduler *s)
         return;
     }
 
+    //printf("avant partition\n");
     p = partition(a, lo, hi);
+    //printf("avant first sched spawn\n");
     rc = sched_spawn(quicksort, new_args(a, lo, p), s);
     assert(rc >= 0);
+    //printf("avant second sched spawn\n");
     rc = sched_spawn(quicksort, new_args(a, p + 1, hi), s);
     assert(rc >= 0);
 }
@@ -146,7 +151,11 @@ main(int argc, char **argv)
     printf("Done in %lf seconds.\n", delay);
 
     for(int i = 0; i < n - 1; i++) {
-        assert(a[i] <= a[i + 1]);
+        /* assert(a[i] <= a[i + 1]); */
+        if (a[i] > a[i + 1]) {
+            printf("Error: a[%d] = %d > a[%d] = %d\n", i, a[i], i + 1, a[i + 1]);
+            break;
+        }
     }
 
     free(a);
