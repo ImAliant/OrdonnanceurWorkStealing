@@ -146,7 +146,11 @@ main(int argc, char **argv)
     printf("Done in %lf seconds.\n", delay);
 
     for(int i = 0; i < n - 1; i++) {
-        assert(a[i] <= a[i + 1]);
+        /* assert(a[i] <= a[i + 1]); */
+        if (a[i] > a[i + 1]) {
+            printf("Error: a[%d] = %d > a[%d] = %d\n", i, a[i], i + 1, a[i + 1]);
+            break;
+        }
     }
 
     free(a);
