@@ -149,7 +149,7 @@ void *job(void *arg)
             sched_normal_pop(s, index);
         }
 
-        //deque_print_caracteristics(s->threads[index].deque);
+        // deque_print_caracteristics(s->threads[index].deque);
     }
 
     return NULL;
@@ -189,10 +189,13 @@ int sched_work_stealing(struct scheduler *s, const int index)
         if (munmap(node, sizeof(Node)) == -1)
         {
             perror("munmap node");
+            exit(EXIT_FAILURE);
         }
         node = NULL;
 
         t->func(t->closure, s);
+
+        free(t);
 
         return 0;
     }
@@ -220,6 +223,8 @@ int sched_normal_pop(struct scheduler *s, const int index)
 
     t->func(t->closure, s);
 
+    free(t);
+
     return 0;
 }
 
@@ -246,7 +251,7 @@ int sched_init_threads(struct scheduler *s, taskfunc f, void *closure)
     if (!s->threads[index_dep].deque)
     {
         perror("deque null");
-        return 1;
+        exit(EXIT_FAILURE);
     }
     struct task *task = create_task(f, closure);
     deque_push_rear(s->threads[index_dep].deque, task);
@@ -314,7 +319,8 @@ int sched_spawn(taskfunc f, void *closure, struct scheduler *s)
     struct task *task = malloc(sizeof(struct task));
     if (!task)
     {
-        return 1;
+        perror("malloc sched_spawn task");
+        exit(EXIT_FAILURE);
     }
     task->func = f;
     task->closure = closure;
@@ -323,13 +329,13 @@ int sched_spawn(taskfunc f, void *closure, struct scheduler *s)
     if (index_thread == -1)
     {
         perror("error thread not found");
-        return 1;
+        exit(EXIT_FAILURE);
     }
 
     if (is_smt_task_full(s))
     {
         perror("too much task at the same time");
-        return 1;
+        exit(EXIT_FAILURE);
     }
 
     increment_smt_task(s);
