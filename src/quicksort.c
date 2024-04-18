@@ -8,25 +8,20 @@
 
 int partition(int *a, int lo, int hi)
 {
-    //printf("partition: %d %d\n", lo, hi);
     int pivot = a[lo];
     int i = lo - 1;
     int j = hi + 1;
     int t;
     while(1) {
-        //printf("partition while\n");
         do {
-            //printf("i\n");
             i++;
         } while(a[i] < pivot);
 
         do {
-            //printf("j\n");
             j--;
         } while(a[j] > pivot);
 
         if(i >= j) {
-            //printf("return\n");
             return j;
         }
 
@@ -34,7 +29,6 @@ int partition(int *a, int lo, int hi)
         a[i] = a[j];
         a[j] = t;
     }
-    //printf("fin partition\n");
 }
 
 struct quicksort_args

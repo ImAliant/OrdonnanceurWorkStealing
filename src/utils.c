@@ -1,0 +1,41 @@
+#include "utils.h"
+
+#include <sys/mman.h>
+#include <stdlib.h>
+#include <stdio.h>
+
+void *do_mmap(const size_t size, const int prot, const int flags)
+{
+    void *mem = mmap(NULL, size,
+                     prot, flags,
+                     -1, 0);
+    if (mem == MAP_FAILED)
+    {
+        perror("mmap");
+        exit(EXIT_FAILURE);
+    }
+
+    return mem;
+}
+
+void do_munmap(void *mem, const size_t size)
+{
+    if (munmap(mem, size) == -1)
+    {
+        perror("munmap");
+        exit(EXIT_FAILURE);
+    }
+    mem = NULL;
+}
+
+void *do_malloc(const size_t size)
+{
+    void *mem = malloc(size);
+    if (mem == NULL)
+    {
+        perror("malloc");
+        exit(EXIT_FAILURE);
+    }
+
+    return mem;
+}

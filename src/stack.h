@@ -10,25 +10,27 @@ struct task {
 };
 
 struct stack {
-    struct task *data;
-    size_t capacity;
-    size_t top;
+    struct task **data;
+    int top;
+    unsigned capacity;
     int is_blocking;
     pthread_mutex_t lock;
-    pthread_cond_t cond_full;   
+    pthread_cond_t cond_full;
     pthread_cond_t cond_empty;
-    int waiting_threads;
-    int nthreads;
+
+    unsigned waiting_threads;
+    unsigned nthreads;
 };
 
-struct stack *stack_create(const size_t capacity, const int nthreads);
-int is_full(struct stack *s);
-int is_empty(struct stack *s);
-int push(struct stack *s, taskfunc func, void *closure);
-struct task* pop(struct stack *s);
-struct task* peek(struct stack *s);
-void destroy_stack(struct stack *s);
-size_t stack_size(struct stack *s);
-void set_blocking(struct stack *s, int is_blocking);
+struct task *create_task(taskfunc, void *);
+
+struct stack *stack_create(const unsigned, const int);
+void stack_destroy(struct stack *);
+void stack_push(struct stack *, struct task *);
+struct task *stack_pop(struct stack *);
+int stack_full(struct stack *);
+int stack_empty(struct stack *);
+void stack_state(struct stack *);
+void stack_blocking(struct stack *, const int);
 
 #endif

@@ -15,7 +15,6 @@ sched_default_threads()
 
 int sched_init(int nthreads, int qlen, taskfunc f, void *closure);
 int sched_spawn(taskfunc f, void *closure, struct scheduler *s);
-void start(struct scheduler *s);
-void stop(struct scheduler *s);
+int sched_stop(struct scheduler *s);
 
 #endif
