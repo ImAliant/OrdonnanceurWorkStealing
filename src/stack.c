@@ -27,7 +27,6 @@ struct stack *stack_create(const unsigned capacity, const int nthreads)
     s->capacity = capacity;
     s->nthreads = nthreads;
     s->waiting_threads = 0;
-    s->is_blocking = 0;
 
     pthread_mutex_init(&s->lock, NULL);
     pthread_cond_init(&s->cond_full, NULL);
@@ -49,14 +48,9 @@ void stack_push(struct stack *s, struct task *task)
 {
     pthread_mutex_lock(&s->lock);
 
-    while (stack_full(s) && s->is_blocking)
+    while (stack_full(s))
     {
         pthread_cond_wait(&s->cond_full, &s->lock);
-    }
-    if (stack_full(s))
-    {
-        pthread_mutex_unlock(&s->lock);
-        return;
     }
     if (stack_empty(s))
     {
@@ -72,7 +66,7 @@ struct task *stack_pop(struct stack *s)
 {
     pthread_mutex_lock(&s->lock);
 
-    while (stack_empty(s) && s->is_blocking)
+    while (stack_empty(s))
     {
         s->waiting_threads++;
         if (s->waiting_threads == s->nthreads)
@@ -84,11 +78,6 @@ struct task *stack_pop(struct stack *s)
 
         pthread_cond_wait(&s->cond_empty, &s->lock);
         s->waiting_threads--;
-    }
-    if (stack_empty(s))
-    {
-        pthread_mutex_unlock(&s->lock);
-        return NULL;
     }
     if (stack_full(s))
     {
@@ -116,12 +105,6 @@ void stack_state(struct stack *s)
     printf("stack state:\n");
     printf("top: %d\n", s->top);
     printf("capacity: %d\n", s->capacity);
-    printf("is_blocking: %d\n", s->is_blocking);
     printf("waiting_threads: %d\n", s->waiting_threads);
     printf("nthreads: %d\n", s->nthreads);
-}
-
-void stack_blocking(struct stack *s, const int blocking)
-{
-    s->is_blocking = blocking;
 }

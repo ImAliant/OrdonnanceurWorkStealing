@@ -13,7 +13,6 @@ struct stack {
     struct task **data;
     int top;
     unsigned capacity;
-    int is_blocking;
     pthread_mutex_t lock;
     pthread_cond_t cond_full;
     pthread_cond_t cond_empty;
@@ -31,6 +30,5 @@ struct task *stack_pop(struct stack *);
 int stack_full(struct stack *);
 int stack_empty(struct stack *);
 void stack_state(struct stack *);
-void stack_blocking(struct stack *, const int);
 
 #endif

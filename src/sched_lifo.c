@@ -82,8 +82,6 @@ int sched_launch_threads(struct scheduler *s, taskfunc f, void *closure)
     struct task *t = create_task(f, closure);
     stack_push(s->stack, t);
 
-    stack_blocking(s->stack, 1);
-
     for (int i = 0; i < s->nthreads; i++)
     {
         pthread_create(&s->threads[i], NULL, job, s);
