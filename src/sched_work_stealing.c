@@ -160,15 +160,21 @@ int increment_k(int k, int nthreads)
     return (k + 1) % nthreads;
 }
 
+size_t generate_random_k(const int index, const unsigned nthreads)
+{
+    srand(time(NULL));
+    size_t k = rand() % nthreads;
+    if (k == index)
+    {
+        k = increment_k(k, nthreads);
+    }
+    return k;
+}
+
 int sched_work_stealing(struct scheduler *s, const int index)
 {
     // TODO petite fonction pour generer un k random
-    srand(time(NULL));
-    size_t k_initial = rand() % s->nthreads;
-    if (k_initial == index)
-    {
-        k_initial = increment_k(k_initial, s->nthreads);
-    }
+    const size_t k_initial = generate_random_k(index, s->nthreads);
     size_t k = k_initial;
     int first_iteration = 1;
 
@@ -253,6 +259,7 @@ int sched_init_threads(struct scheduler *s, taskfunc f, void *closure)
         perror("deque null");
         exit(EXIT_FAILURE);
     }
+    
     struct task *task = create_task(f, closure);
     deque_push_rear(s->threads[index_dep].deque, task);
 
