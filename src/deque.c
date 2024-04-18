@@ -27,7 +27,7 @@ struct task *create_task(taskfunc f, void *closure) {
     if (t == NULL)
     {
         perror("malloc task\n");
-        return NULL;
+        exit(EXIT_FAILURE);
     }
 
     t->func = f;
@@ -205,7 +205,7 @@ int deque_empty(struct deque *d)
     if (!d)
     {
         perror("error: deque is NULL");
-        return 1;
+        exit(EXIT_FAILURE);
     }
     
     return d->size == 0;
