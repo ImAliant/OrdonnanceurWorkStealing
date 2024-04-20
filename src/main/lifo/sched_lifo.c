@@ -1,6 +1,6 @@
 #include "sched.h"
 #include "stack.h"
-#include "utils.h"
+#include "../utils.h"
 
 #include <stdlib.h>
 #include <stdio.h>

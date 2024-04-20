@@ -2,7 +2,7 @@
 #define STACK_H
 #include <pthread.h>
 
-#include "sched.h"
+#include "../sched.h"
 
 struct task {
     taskfunc func;
