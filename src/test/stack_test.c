@@ -1,5 +1,5 @@
 #include "stack_test.h"
-#include "utils.h"
+#include "../main/utils.h"
 
 #include <stdio.h>
 #include <stdlib.h>

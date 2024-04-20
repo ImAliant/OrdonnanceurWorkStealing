@@ -1,5 +1,5 @@
 #include "deque_test.h"
-#include "mmap_utils.h"
+#include "../main/utils.h"
 
 #include <stdio.h>
 #include <stdlib.h>
