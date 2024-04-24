@@ -28,6 +28,24 @@ test_all: scheduler_test_lifo scheduler_test_ws
 test_lifo: scheduler_test_lifo
 test_ws: scheduler_test_ws
 
+benchmark_comparaison_lifo_ws: scheduler_lifo scheduler_work_stealing
+	./scheduler_lifo -g -t 1
+	./scheduler_lifo -g -t 2
+	./scheduler_lifo -g -t 3
+	./scheduler_lifo -g -t 4
+	./scheduler_lifo -g -t 5
+	./scheduler_lifo -g -t 6
+	./scheduler_lifo -g -t 7
+	./scheduler_lifo -g -t 8
+	./scheduler_work_stealing -g -t 1
+	./scheduler_work_stealing -g -t 2
+	./scheduler_work_stealing -g -t 3
+	./scheduler_work_stealing -g -t 4
+	./scheduler_work_stealing -g -t 5
+	./scheduler_work_stealing -g -t 6
+	./scheduler_work_stealing -g -t 7
+	./scheduler_work_stealing -g -t 8
+
 benchmark_work_stealing: scheduler_work_stealing
 	./scheduler_work_stealing -t 1
 	./scheduler_work_stealing -t 2

@@ -203,8 +203,8 @@ int sched_init(int nthreads, int qlen, taskfunc f, void *closure)
             nthreads: %d \
             qlen: %d \
             taskfunc: %p \
-            closure: %p\n", 
-            nthreads, qlen, f, closure);
+            closure: %p\n",
+           nthreads, qlen, f, closure);
 
     if (nthreads == -1)
     {
@@ -320,27 +320,23 @@ int sched_spawn(taskfunc f, void *closure, struct scheduler *s)
     return 0;
 }
 
-int write_results(struct scheduler *s, int total_task_completed, 
-    int total_task_work_stealing_completed, 
-    int total_task_work_stealing_failed)
+int write_results(struct scheduler *s, int total_task_completed,
+                  int total_task_work_stealing_completed,
+                  int total_task_work_stealing_failed)
 {
-    FILE *fp = fopen("result.txt", "a");
+    FILE *fp = fopen("benchmark/result.txt", "a");
     if (fp == NULL)
     {
         fprintf(stderr, "Error opening file\n");
         return 1;
     }
 
-    fprintf(fp, "%s %ld %d %d %d\n", 
-        "WS", s->nthreads, total_task_completed, 
-        total_task_work_stealing_completed,
-        total_task_work_stealing_failed);
     for (int i = 0; i < s->nthreads; i++)
     {
-        fprintf(fp, "%d %d %d %d\n", 
-            i, s->threads[i].benchmark.task_completed_count, 
-            s->threads[i].benchmark.task_work_stealing_completed_count,
-            s->threads[i].benchmark.task_work_stealing_failed_count);
+        fprintf(fp, "%d %d %d %d\n",
+                i, s->threads[i].benchmark.task_completed_count,
+                s->threads[i].benchmark.task_work_stealing_completed_count,
+                s->threads[i].benchmark.task_work_stealing_failed_count);
     }
 
     fclose(fp);
@@ -359,7 +355,7 @@ int sched_stop(struct scheduler *s)
     for (int i = 0; i < s->nthreads; i++)
     {
         pthread_join(s->threads[i].thread, NULL);
-        
+
         total_task_completed += s->threads[i].benchmark.task_completed_count;
         total_task_work_stealing_completed += s->threads[i].benchmark.task_work_stealing_completed_count;
         total_task_work_stealing_failed += s->threads[i].benchmark.task_work_stealing_failed_count;
@@ -371,7 +367,10 @@ int sched_stop(struct scheduler *s)
         deque_destroy(s->threads[i].deque);
     }
 
-    write_results(s, total_task_completed, total_task_work_stealing_completed, total_task_work_stealing_failed);
+    if (benchmark)
+    {
+        write_results(s, total_task_completed, total_task_work_stealing_completed, total_task_work_stealing_failed);
+    }
 
     munmap(s, sizeof(struct scheduler) + s->nthreads * sizeof(struct pthread_deque));
     debugf("Scheduler stopped\n");

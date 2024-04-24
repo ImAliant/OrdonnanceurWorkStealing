@@ -7,7 +7,7 @@
 #include "sched.h"
 #include "utils.h"
 
-//int debug;
+// int debug;
 
 int partition(int *a, int lo, int hi)
 {
@@ -15,16 +15,20 @@ int partition(int *a, int lo, int hi)
     int i = lo - 1;
     int j = hi + 1;
     int t;
-    while(1) {
-        do {
+    while (1)
+    {
+        do
+        {
             i++;
-        } while(a[i] < pivot);
+        } while (a[i] < pivot);
 
-        do {
+        do
+        {
             j--;
-        } while(a[j] > pivot);
+        } while (a[j] > pivot);
 
-        if(i >= j) {
+        if (i >= j)
+        {
             return j;
         }
 
@@ -67,7 +71,7 @@ void quicksort_serial(int *a, int lo, int hi)
 
 void quicksort(void *closure, struct scheduler *s)
 {
-    //printf("quicksort\n");
+    // printf("quicksort\n");
 
     struct quicksort_args *args = (struct quicksort_args *)closure;
     int *a = args->a;
@@ -89,14 +93,28 @@ void quicksort(void *closure, struct scheduler *s)
         return;
     }
 
-    //printf("avant partition\n");
+    // printf("avant partition\n");
     p = partition(a, lo, hi);
-    //printf("avant first sched spawn\n");
+    // printf("avant first sched spawn\n");
     rc = sched_spawn(quicksort, new_args(a, lo, p), s);
     assert(rc >= 0);
-    //printf("avant second sched spawn\n");
+    // printf("avant second sched spawn\n");
     rc = sched_spawn(quicksort, new_args(a, p + 1, hi), s);
     assert(rc >= 0);
+}
+
+int write_result_runtime(char *command, int nthreads, double runtime)
+{
+    FILE *f = fopen("benchmark/runtime.txt", "a");
+    if (f == NULL)
+    {
+        perror("fopen");
+        return -1;
+    }
+
+    fprintf(f, "%s %d %lf\n", command, nthreads, runtime);
+    fclose(f);
+    return 0;
 }
 
 int main(int argc, char **argv)
@@ -111,7 +129,7 @@ int main(int argc, char **argv)
 
     while (1)
     {
-        int opt = getopt(argc, argv, "dsn:t:");
+        int opt = getopt(argc, argv, "gdsn:t:");
         if (opt < 0)
             break;
         switch (opt)
@@ -119,6 +137,10 @@ int main(int argc, char **argv)
         case 'd':
             debug = 1;
             debugf("debugging enabled\n");
+            break;
+        case 'g':
+            benchmark = 1;
+            debugf("benchmarking enabled\n");
             break;
         case 's':
             serial = 1;
@@ -164,6 +186,12 @@ int main(int argc, char **argv)
     delay = end.tv_sec + end.tv_nsec / 1000000000.0 -
             (begin.tv_sec + begin.tv_nsec / 1000000000.0);
     printf("Done in %lf seconds.\n", delay);
+
+    if (benchmark)
+    {
+        char *command = argv[0];
+        write_result_runtime(command, nthreads, delay);
+    }
 
     for (int i = 0; i < n - 1; i++)
     {

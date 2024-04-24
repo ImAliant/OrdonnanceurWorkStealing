@@ -6,6 +6,7 @@
 #include <stdarg.h>
 
 int debug = 0;
+int benchmark = 0;
 
 void *do_mmap(const size_t size, const int prot, const int flags)
 {
