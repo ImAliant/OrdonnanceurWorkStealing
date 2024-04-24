@@ -172,6 +172,7 @@ Node *deque_pop_rear(struct deque *d)
 
     if (d->rear == NULL) // deque is empty
     {
+        pthread_mutex_unlock(&d->lock);
         return NULL;
     }
 

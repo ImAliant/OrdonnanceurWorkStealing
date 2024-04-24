@@ -9,6 +9,11 @@ int debug = 0;
 
 void *do_mmap(const size_t size, const int prot, const int flags)
 {
+    debugf("Mapping memory |\
+    size: %zu\
+    prot: %d\
+    flags: %d\n", size, prot, flags);
+
     void *mem = mmap(NULL, size,
                      prot, flags,
                      -1, 0);
@@ -23,6 +28,10 @@ void *do_mmap(const size_t size, const int prot, const int flags)
 
 void do_munmap(void *mem, const size_t size)
 {
+    debugf("Unmapping memory |\
+    mem: %p\
+    size: %zu\n", mem, size);
+
     if (munmap(mem, size) == -1)
     {
         perror("munmap");
@@ -33,6 +42,9 @@ void do_munmap(void *mem, const size_t size)
 
 void *do_malloc(const size_t size)
 {
+    debugf("Allocating memory |\
+    size: %zu\n", size);
+
     void *mem = malloc(size);
     if (mem == NULL)
     {

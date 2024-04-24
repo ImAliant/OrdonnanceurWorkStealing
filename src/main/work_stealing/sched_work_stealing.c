@@ -106,7 +106,8 @@ void *job(void *arg)
             break;
         }
 
-        if (deque_empty(s->threads[index].deque))
+        int found = sched_normal_pop(s, index);
+        if (!found)
         {
             int sleep = sched_work_stealing(s, index);
             if (sleep)
@@ -126,10 +127,6 @@ void *job(void *arg)
                 s->asleep_threads--;
                 pthread_mutex_unlock(&s->mutex);
             }
-        }
-        else
-        {
-            sched_normal_pop(s, index);
         }
     }
     return NULL;
@@ -193,8 +190,7 @@ int sched_normal_pop(struct scheduler *s, const int index)
     Node *node = deque_pop_rear(s->threads[index].deque);
     if (node == NULL)
     {
-        perror("node ne peut pas être null");
-        exit(EXIT_FAILURE);
+        return 0;
     }
 
     struct task *t = node->task;
@@ -210,17 +206,17 @@ int sched_normal_pop(struct scheduler *s, const int index)
 
     free(t);
 
-    return 0;
+    return 1;
 }
 
 int sched_init(int nthreads, int qlen, taskfunc f, void *closure)
 {
     debugf("sched_init | \
-nthreads: %d \
-qlen: %d \
-taskfunc: %p \
-closure: %p\n",
-           nthreads, qlen, f, closure);
+            nthreads: %d \
+            qlen: %d \
+            taskfunc: %p \
+            closure: %p\n", 
+            nthreads, qlen, f, closure);
 
     if (nthreads == -1)
     {
