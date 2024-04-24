@@ -118,7 +118,7 @@ int main(int argc, char **argv)
         {
         case 'd':
             debug = 1;
-            debugf("debugging enabled debug= %d\n", debug);
+            debugf("debugging enabled\n");
             break;
         case 's':
             serial = 1;

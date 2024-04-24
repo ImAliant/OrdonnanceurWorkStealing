@@ -65,6 +65,7 @@ int is_smt_task_full(struct scheduler *s)
 
 struct scheduler *create_scheduler(const unsigned nthreads, const unsigned qlen)
 {
+    debugf("Scheduler creation with %d threads\n", nthreads);
     void *scheduler_mem = do_mmap(
         sizeof(struct scheduler),
         PROT_READ | PROT_WRITE,
@@ -87,7 +88,7 @@ struct scheduler *create_scheduler(const unsigned nthreads, const unsigned qlen)
 
 void *job(void *arg)
 {
-    // printf("job pthread id: %ld\n", pthread_self());
+    debugf("Function job for the thread %ld\n", pthread_self());
     struct job_args *args = (struct job_args *)arg;
     if (args == NULL)
     {
@@ -124,17 +125,13 @@ void *job(void *arg)
                 pthread_mutex_lock(&s->mutex);
                 s->asleep_threads--;
                 pthread_mutex_unlock(&s->mutex);
-                
             }
         }
         else
         {
             sched_normal_pop(s, index);
         }
-
-        // deque_print_caracteristics(s->threads[index].deque);
     }
-
     return NULL;
 }
 
@@ -219,11 +216,11 @@ int sched_normal_pop(struct scheduler *s, const int index)
 int sched_init(int nthreads, int qlen, taskfunc f, void *closure)
 {
     debugf("sched_init | \
-            nthreads: %d \
-            qlen: %d \
-            taskfunc: %p \
-            closure: %p\n", 
-            nthreads, qlen, f, closure);
+nthreads: %d \
+qlen: %d \
+taskfunc: %p \
+closure: %p\n",
+           nthreads, qlen, f, closure);
 
     if (nthreads == -1)
     {
@@ -241,12 +238,6 @@ int sched_init(int nthreads, int qlen, taskfunc f, void *closure)
 
 int sched_init_threads(struct scheduler *s, taskfunc f, void *closure)
 {
- debugf("sched_init threads | \
-            nthreads: %d \
-            qlen: %d \
-            taskfunc: %p \
-            closure: %p\n", 
-            nthreads, qlen, f, closure);
     const size_t index_dep = 0;
     s->threads[index_dep].deque = deque_create();
     if (!s->threads[index_dep].deque)
@@ -267,6 +258,7 @@ int sched_init_threads(struct scheduler *s, taskfunc f, void *closure)
 
 int sched_init_deque(struct scheduler *s, const size_t index_dep)
 {
+    debugf("Initializing deque\n");
     for (int i = 0; i < s->nthreads; i++)
     {
         if (i != index_dep)
@@ -297,6 +289,7 @@ int sched_launch_pthread(struct scheduler *s)
 
         pthread_create(&s->threads[i].thread, NULL, job, args);
     }
+    debugf("All threads launched\n");
 
     return 0;
 }
@@ -349,6 +342,7 @@ int sched_spawn(taskfunc f, void *closure, struct scheduler *s)
 
 int sched_stop(struct scheduler *s)
 {
+    debugf("Stopping scheduler\n");
     for (int i = 0; i < s->nthreads; i++)
     {
         pthread_join(s->threads[i].thread, NULL);
@@ -356,10 +350,12 @@ int sched_stop(struct scheduler *s)
 
     for (int i = 0; i < s->nthreads; i++)
     {
+        debugf("Destroying deque %d\n", i);
         deque_destroy(s->threads[i].deque);
     }
 
     munmap(s, sizeof(struct scheduler) + s->nthreads * sizeof(struct pthread_deque));
+    debugf("Scheduler stopped\n");
 
     return 0;
 }
