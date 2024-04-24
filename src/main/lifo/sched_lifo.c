@@ -1,4 +1,4 @@
-#include "sched.h"
+#include "sched_lifo.h"
 #include "stack.h"
 #include "../utils.h"
 
@@ -8,14 +8,6 @@
 #include <sys/mman.h>
 #include <errno.h>
 #include <pthread.h>
-
-struct scheduler
-{
-    unsigned nthreads;
-    unsigned qlen;
-    struct stack *stack;
-    pthread_t *threads;
-};
 
 int sched_launch_threads(struct scheduler *s, taskfunc f, void *closure);
 
@@ -100,7 +92,7 @@ int sched_launch_threads(struct scheduler *s, taskfunc f, void *closure)
 
 int sched_spawn(taskfunc f, void *closure, struct scheduler *s)
 {
-    //debugf("Spawning task\n");
+    // debugf("Spawning task\n");
 
     struct task *t = create_task(f, closure);
     stack_push(s->stack, t);

@@ -23,9 +23,20 @@ SCHED_WS := $(WS)/sched_work_stealing.c
 TEST_WS := $(TEST)/test_ws.c
 
 all: scheduler_lifo scheduler_work_stealing
+
 test_all: scheduler_test_lifo scheduler_test_ws
 test_lifo: scheduler_test_lifo
 test_ws: scheduler_test_ws
+
+benchmark_work_stealing: scheduler_work_stealing
+	./scheduler_work_stealing -t 1
+	./scheduler_work_stealing -t 2
+	./scheduler_work_stealing -t 3
+	./scheduler_work_stealing -t 4
+	./scheduler_work_stealing -t 5
+	./scheduler_work_stealing -t 6
+	./scheduler_work_stealing -t 7
+	./scheduler_work_stealing -t 8
 
 scheduler_lifo: $(QUICKSORT) $(STACK) $(SCHED_LIFO) $(UTILS)
 	$(CC) $(CFLAGS) -o $@ $^

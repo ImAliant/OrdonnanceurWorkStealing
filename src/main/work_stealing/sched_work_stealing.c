@@ -1,12 +1,14 @@
-#include "sched.h"
+#include "sched_work_stealing.h"
 #include "deque.h"
 #include "../utils.h"
+#include "../benchmark.h"
 
 #include <pthread.h>
 #include <sys/mman.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <time.h>
 
 int sched_init_threads(struct scheduler *, taskfunc, void *);
 int sched_init_deque(struct scheduler *, const size_t);
@@ -14,27 +16,10 @@ int sched_launch_pthread(struct scheduler *);
 int sched_work_stealing(struct scheduler *, const int);
 int sched_normal_pop(struct scheduler *, const int);
 
-struct pthread_deque
-{
-    pthread_t thread;
-    struct deque *deque;
-};
-
 struct job_args
 {
     struct scheduler *s;
     int index;
-};
-
-struct scheduler
-{
-    size_t nthreads;
-    size_t qlen;
-    size_t smt_task;
-    struct pthread_deque *threads;
-    size_t asleep_threads;
-    unsigned int break_all;
-    pthread_mutex_t mutex;
 };
 
 void increment_smt_task(struct scheduler *s)
@@ -163,6 +148,9 @@ int sched_work_stealing(struct scheduler *s, const int index)
         if (node == NULL)
         {
             k = increment_k(k, s->nthreads);
+
+            s->threads[index].benchmark.task_work_stealing_failed_count++;
+
             continue;
         }
 
@@ -171,6 +159,9 @@ int sched_work_stealing(struct scheduler *s, const int index)
         free(node);
 
         t->func(t->closure, s);
+
+        s->threads[index].benchmark.task_completed_count++;
+        s->threads[index].benchmark.task_work_stealing_completed_count++;
 
         free(t);
 
@@ -198,6 +189,8 @@ int sched_normal_pop(struct scheduler *s, const int index)
     }
 
     t->func(t->closure, s);
+
+    s->threads[index].benchmark.task_completed_count++;
 
     free(t);
 
@@ -302,12 +295,8 @@ int sched_find_thread(struct scheduler *s)
 
 int sched_spawn(taskfunc f, void *closure, struct scheduler *s)
 {
-    struct task *task = malloc(sizeof(struct task));
-    if (!task)
-    {
-        perror("malloc sched_spawn task");
-        exit(EXIT_FAILURE);
-    }
+    struct task *task = do_malloc(sizeof(struct task));
+
     task->func = f;
     task->closure = closure;
 
@@ -331,12 +320,49 @@ int sched_spawn(taskfunc f, void *closure, struct scheduler *s)
     return 0;
 }
 
+int write_results(struct scheduler *s, int total_task_completed, 
+    int total_task_work_stealing_completed, 
+    int total_task_work_stealing_failed)
+{
+    FILE *fp = fopen("result.txt", "a");
+    if (fp == NULL)
+    {
+        fprintf(stderr, "Error opening file\n");
+        return 1;
+    }
+
+    fprintf(fp, "%s %ld %d %d %d\n", 
+        "WS", s->nthreads, total_task_completed, 
+        total_task_work_stealing_completed,
+        total_task_work_stealing_failed);
+    for (int i = 0; i < s->nthreads; i++)
+    {
+        fprintf(fp, "%d %d %d %d\n", 
+            i, s->threads[i].benchmark.task_completed_count, 
+            s->threads[i].benchmark.task_work_stealing_completed_count,
+            s->threads[i].benchmark.task_work_stealing_failed_count);
+    }
+
+    fclose(fp);
+
+    return 0;
+}
+
 int sched_stop(struct scheduler *s)
 {
     debugf("Stopping scheduler\n");
+
+    int total_task_completed = 0;
+    int total_task_work_stealing_completed = 0;
+    int total_task_work_stealing_failed = 0;
+
     for (int i = 0; i < s->nthreads; i++)
     {
         pthread_join(s->threads[i].thread, NULL);
+        
+        total_task_completed += s->threads[i].benchmark.task_completed_count;
+        total_task_work_stealing_completed += s->threads[i].benchmark.task_work_stealing_completed_count;
+        total_task_work_stealing_failed += s->threads[i].benchmark.task_work_stealing_failed_count;
     }
 
     for (int i = 0; i < s->nthreads; i++)
@@ -344,6 +370,8 @@ int sched_stop(struct scheduler *s)
         debugf("Destroying deque %d\n", i);
         deque_destroy(s->threads[i].deque);
     }
+
+    write_results(s, total_task_completed, total_task_work_stealing_completed, total_task_work_stealing_failed);
 
     munmap(s, sizeof(struct scheduler) + s->nthreads * sizeof(struct pthread_deque));
     debugf("Scheduler stopped\n");
