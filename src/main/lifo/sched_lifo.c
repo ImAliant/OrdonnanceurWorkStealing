@@ -21,6 +21,8 @@ int sched_launch_threads(struct scheduler *s, taskfunc f, void *closure);
 
 struct scheduler *create_scheduler(const unsigned nthreads, const unsigned qlen)
 {
+    debugf("Creating scheduler with %d threads and queue length %d\n", nthreads, qlen);
+
     void *scheduler_mem = do_mmap(sizeof(struct scheduler),
                                   PROT_READ | PROT_WRITE,
                                   MAP_PRIVATE | MAP_ANONYMOUS);
@@ -38,6 +40,8 @@ struct scheduler *create_scheduler(const unsigned nthreads, const unsigned qlen)
 
 int sched_init(int nthreads, int qlen, taskfunc f, void *closure)
 {
+    debugf("Initializing scheduler with %d threads and queue length %d\n", nthreads, qlen);
+
     if (nthreads == -1)
     {
         nthreads = sched_default_threads();
@@ -54,6 +58,8 @@ int sched_init(int nthreads, int qlen, taskfunc f, void *closure)
 
 void *job(void *arg)
 {
+    debugf("Starting job\n");
+
     struct scheduler *s = (struct scheduler *)arg;
     if (s == NULL)
     {
@@ -79,6 +85,8 @@ void *job(void *arg)
 
 int sched_launch_threads(struct scheduler *s, taskfunc f, void *closure)
 {
+    debugf("Launching threads\n");
+
     struct task *t = create_task(f, closure);
     stack_push(s->stack, t);
 
@@ -92,6 +100,8 @@ int sched_launch_threads(struct scheduler *s, taskfunc f, void *closure)
 
 int sched_spawn(taskfunc f, void *closure, struct scheduler *s)
 {
+    //debugf("Spawning task\n");
+
     struct task *t = create_task(f, closure);
     stack_push(s->stack, t);
 
@@ -100,6 +110,8 @@ int sched_spawn(taskfunc f, void *closure, struct scheduler *s)
 
 int sched_stop(struct scheduler *s)
 {
+    debugf("Stopping scheduler\n");
+
     for (int i = 0; i < s->nthreads; i++)
     {
         pthread_join(s->threads[i], NULL);
