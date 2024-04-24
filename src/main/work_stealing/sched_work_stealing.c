@@ -124,6 +124,7 @@ void *job(void *arg)
                 pthread_mutex_lock(&s->mutex);
                 s->asleep_threads--;
                 pthread_mutex_unlock(&s->mutex);
+                
             }
         }
         else
@@ -217,6 +218,13 @@ int sched_normal_pop(struct scheduler *s, const int index)
 
 int sched_init(int nthreads, int qlen, taskfunc f, void *closure)
 {
+    debugf("sched_init | \
+            nthreads: %d \
+            qlen: %d \
+            taskfunc: %p \
+            closure: %p\n", 
+            nthreads, qlen, f, closure);
+
     if (nthreads == -1)
     {
         nthreads = sched_default_threads();
@@ -233,6 +241,12 @@ int sched_init(int nthreads, int qlen, taskfunc f, void *closure)
 
 int sched_init_threads(struct scheduler *s, taskfunc f, void *closure)
 {
+ debugf("sched_init threads | \
+            nthreads: %d \
+            qlen: %d \
+            taskfunc: %p \
+            closure: %p\n", 
+            nthreads, qlen, f, closure);
     const size_t index_dep = 0;
     s->threads[index_dep].deque = deque_create();
     if (!s->threads[index_dep].deque)

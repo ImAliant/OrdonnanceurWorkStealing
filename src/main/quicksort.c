@@ -5,6 +5,9 @@
 #include <assert.h>
 
 #include "sched.h"
+#include "utils.h"
+
+//int debug;
 
 int partition(int *a, int lo, int hi)
 {
@@ -108,11 +111,15 @@ int main(int argc, char **argv)
 
     while (1)
     {
-        int opt = getopt(argc, argv, "sn:t:");
+        int opt = getopt(argc, argv, "dsn:t:");
         if (opt < 0)
             break;
         switch (opt)
         {
+        case 'd':
+            debug = 1;
+            debugf("debugging enabled debug= %d\n", debug);
+            break;
         case 's':
             serial = 1;
             break;

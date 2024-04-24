@@ -3,6 +3,9 @@
 #include <sys/mman.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdarg.h>
+
+int debug = 0;
 
 void *do_mmap(const size_t size, const int prot, const int flags)
 {
@@ -38,4 +41,16 @@ void *do_malloc(const size_t size)
     }
 
     return mem;
+}
+
+void debugf(const char *format, ...)
+{
+    va_list args;
+    va_start(args, format);
+    if (debug)
+    {
+        vfprintf(stderr, format, args);
+        fflush(stderr);
+    }
+    va_end(args);
 }
