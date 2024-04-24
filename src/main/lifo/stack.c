@@ -7,6 +7,10 @@
 
 struct task *create_task(taskfunc f, void *closure)
 {
+    debugf("Creating task |\
+    taskfunc: %p\
+    closure: %p\n", f, closure);
+
     struct task *t = (struct task *)do_malloc(sizeof(struct task));
     t->func = f;
     t->closure = closure;
@@ -16,6 +20,8 @@ struct task *create_task(taskfunc f, void *closure)
 
 struct stack *stack_create(const unsigned capacity, const int nthreads)
 {
+    debugf("Creating stack with capacity %d and %d threads\n", capacity, nthreads);
+
     void *stack_mem = do_mmap(sizeof(struct stack),
                               PROT_READ | PROT_WRITE,
                               MAP_PRIVATE | MAP_ANONYMOUS);
@@ -37,6 +43,9 @@ struct stack *stack_create(const unsigned capacity, const int nthreads)
 
 void stack_destroy(struct stack *s)
 {
+    debugf("Destroying stack |\
+    stack: %p\n", s);
+
     pthread_mutex_destroy(&s->lock);
     pthread_cond_destroy(&s->cond_full);
     pthread_cond_destroy(&s->cond_empty);
@@ -46,6 +55,10 @@ void stack_destroy(struct stack *s)
 
 void stack_push(struct stack *s, struct task *task)
 {
+    debugf("Pushing task |\
+    stack: %p\
+    task: %p\n", s, task);
+
     pthread_mutex_lock(&s->lock);
 
     while (stack_full(s))
@@ -64,6 +77,9 @@ void stack_push(struct stack *s, struct task *task)
 
 struct task *stack_pop(struct stack *s)
 {
+    debugf("Popping task |\
+    stack: %p\n", s);
+
     pthread_mutex_lock(&s->lock);
 
     while (stack_empty(s))
@@ -92,11 +108,17 @@ struct task *stack_pop(struct stack *s)
 
 int stack_full(struct stack *s)
 {
+    debugf("Checking if stack is full |\
+    stack: %p\n", s);
+
     return s->top == s->capacity - 1;
 }
 
 int stack_empty(struct stack *s)
 {
+    debugf("Checking if stack is empty |\
+    stack: %p\n", s);
+
     return s->top == -1;
 }
 
