@@ -168,12 +168,7 @@ int sched_work_stealing(struct scheduler *s, const int index)
 
         struct task *t = node->task;
 
-        if (munmap(node, sizeof(Node)) == -1)
-        {
-            perror("munmap node");
-            exit(EXIT_FAILURE);
-        }
-        node = NULL;
+        free(node);
 
         t->func(t->closure, s);
 
@@ -194,7 +189,7 @@ int sched_normal_pop(struct scheduler *s, const int index)
     }
 
     struct task *t = node->task;
-    munmap(node, sizeof(Node));
+    free(node);
 
     if (t == NULL)
     {

@@ -7,11 +7,7 @@
 
 Node *create_node(struct task *task)
 {
-    void *node_mem = do_mmap(
-        sizeof(Node),
-        PROT_READ | PROT_WRITE,
-        MAP_PRIVATE | MAP_ANONYMOUS
-    );
+    void *node_mem = do_malloc(sizeof(Node));
 
     Node *new_node = (Node *)node_mem;
 
@@ -23,12 +19,7 @@ Node *create_node(struct task *task)
 }
 
 struct task *create_task(taskfunc f, void *closure) {
-    struct task *t = malloc(sizeof(struct task));
-    if (t == NULL)
-    {
-        perror("malloc task\n");
-        exit(EXIT_FAILURE);
-    }
+    struct task *t = do_malloc(sizeof(Node));
 
     t->func = f;
     t->closure = closure;
@@ -65,7 +56,7 @@ void deque_destroy(struct deque *d)
         temp = current;
         current = current->next;
         free(temp->task);
-        munmap(temp, sizeof(Node));
+        free(temp);
     }
 
     pthread_mutex_destroy(&d->lock);
@@ -74,7 +65,6 @@ void deque_destroy(struct deque *d)
 
 void deque_push_front(struct deque *d, struct task *task)
 {
-    //printf("push front pthread id: %ld\n", pthread_self());
     pthread_mutex_lock(&d->lock);
 
     Node *new_node = create_node(task);
@@ -92,15 +82,11 @@ void deque_push_front(struct deque *d, struct task *task)
 
     d->size++;
 
-    /* printf("push front\n");
-    deque_print_caracteristics(d); */
-
     pthread_mutex_unlock(&d->lock);
 }
 
 void deque_push_rear(struct deque *d, struct task *task)
 {
-    //printf("push rear pthread id: %ld\n", pthread_self());
     pthread_mutex_lock(&d->lock);
 
     Node *new_node = create_node(task);
@@ -119,21 +105,11 @@ void deque_push_rear(struct deque *d, struct task *task)
 
     d->size++;
 
-    /* printf("push rear\n");
-    deque_print_caracteristics(d); */
-
     pthread_mutex_unlock(&d->lock);
 }
 
 Node *deque_pop_front(struct deque *d)
 {
-    //printf("pop front pthread id: %ld\n", pthread_self());
-    if (!d)
-    {
-        perror("error: deque is NULL");
-        exit(EXIT_FAILURE);
-    }
-
     pthread_mutex_lock(&d->lock);
 
     if (d->front == NULL) // deque is empty
@@ -156,9 +132,6 @@ Node *deque_pop_front(struct deque *d)
     }
     d->size--;
 
-    /* printf("pop front\n");
-    deque_print_caracteristics(d); */
-
     pthread_mutex_unlock(&d->lock);
 
     return node;
@@ -166,8 +139,6 @@ Node *deque_pop_front(struct deque *d)
 
 Node *deque_pop_rear(struct deque *d)
 {
-    //printf("pop rear pthread id: %ld\n", pthread_self());
-
     pthread_mutex_lock(&d->lock);
 
     if (d->rear == NULL) // deque is empty
@@ -191,9 +162,6 @@ Node *deque_pop_rear(struct deque *d)
 
     d->size--;
 
-    /* printf("pop rear\n");
-    deque_print_caracteristics(d); */
-
     pthread_mutex_unlock(&d->lock);
 
     return node;
@@ -201,14 +169,6 @@ Node *deque_pop_rear(struct deque *d)
 
 int deque_empty(struct deque *d)
 {
-    //printf("empty pthread id: %ld\n", pthread_self());
-
-    if (!d)
-    {
-        perror("error: deque is NULL");
-        exit(EXIT_FAILURE);
-    }
-    
     return d->size == 0;
 }
 
