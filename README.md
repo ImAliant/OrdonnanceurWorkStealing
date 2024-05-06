@@ -37,6 +37,6 @@ L'option `-d` permet l'affichage des messages de debug.
 L'option `-g` permet de générer le fichier de benchmark.   
 L'option `-s` permet de lancer la version serial du programme.  
 L'option `-n <n>` permet de choisir le nombre `n` d'elements qui sera dans le tableau généré.  
-L'option `-t <n>` permet de choisir le nombre de threads executé en parallele. 
+L'option `-t <n>` permet de choisir le nombre `n` de threads executé en parallèle. 
 
 
