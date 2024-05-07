@@ -1,6 +1,5 @@
-#include "sched.h"
+#include "work_stealing/sched_work_stealing.h"
 
-int write_results(struct scheduler *s, 
-    int total_task_completed, 
-    int total_task_work_stealing_completed, 
-    int total_task_work_stealing_failed);
+int write_task_benchmark(struct scheduler *, int, int, int);
+int write_runtime_benchmark(char *, char *, int, double);
+

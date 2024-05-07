@@ -7,6 +7,7 @@
 
 int debug = 0;
 int benchmark = 0;
+int optimize_ws = 0;
 
 void *do_mmap(const size_t size, const int prot, const int flags)
 {
@@ -56,6 +57,23 @@ void *do_malloc(const size_t size)
     return mem;
 }
 
+FILE *create_file(const char *filename)
+{
+    FILE *fp = fopen(filename, "a");
+    if (fp == NULL)
+    {
+        fprintf(stderr, "Error opening file\n");
+        return NULL;
+    }
+
+    return fp;
+}
+
+/**
+ * @brief Print debug message to stderr
+ * 
+ * @param format 
+ */
 void debugf(const char *format, ...)
 {
     va_list args;

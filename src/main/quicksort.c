@@ -6,8 +6,14 @@
 
 #include "sched.h"
 #include "utils.h"
+#include "benchmark.h"
 
-// int debug;
+#define RUNTIME_BENCHMARK_FILE "benchmark/runtime.txt"
+#define RUNTIME_OPTIMIZED_BENCHMARK_FILE "benchmark/runtime_optimized.txt"
+
+#define NORMAL_QUICKSORT_THRESHOLD 128
+#define OPTIMIZED_QUICKSORT_THRESHOLD 1024
+#define DEFAULT_SIZE_ARRAY 10 * 1024 * 1024
 
 int partition(int *a, int lo, int hi)
 {
@@ -71,8 +77,6 @@ void quicksort_serial(int *a, int lo, int hi)
 
 void quicksort(void *closure, struct scheduler *s)
 {
-    // printf("quicksort\n");
-
     struct quicksort_args *args = (struct quicksort_args *)closure;
     int *a = args->a;
     int lo = args->lo;
@@ -87,34 +91,18 @@ void quicksort(void *closure, struct scheduler *s)
         return;
     }
 
-    if (hi - lo <= 128)
+    int threshold = optimize_ws ? OPTIMIZED_QUICKSORT_THRESHOLD : NORMAL_QUICKSORT_THRESHOLD;
+    if (hi - lo <= threshold)
     {
         quicksort_serial(a, lo, hi);
         return;
     }
 
-    // printf("avant partition\n");
     p = partition(a, lo, hi);
-    // printf("avant first sched spawn\n");
     rc = sched_spawn(quicksort, new_args(a, lo, p), s);
     assert(rc >= 0);
-    // printf("avant second sched spawn\n");
     rc = sched_spawn(quicksort, new_args(a, p + 1, hi), s);
     assert(rc >= 0);
-}
-
-int write_result_runtime(char *command, int nthreads, double runtime)
-{
-    FILE *f = fopen("benchmark/runtime.txt", "a");
-    if (f == NULL)
-    {
-        perror("fopen");
-        return -1;
-    }
-
-    fprintf(f, "%s %d %lf\n", command, nthreads, runtime);
-    fclose(f);
-    return 0;
 }
 
 int main(int argc, char **argv)
@@ -123,13 +111,13 @@ int main(int argc, char **argv)
     struct timespec begin, end;
     double delay;
     int rc;
-    int n = 10 * 1024 * 1024;
+    int n = DEFAULT_SIZE_ARRAY;
     int nthreads = -1;
     int serial = 0;
 
     while (1)
     {
-        int opt = getopt(argc, argv, "gdsn:t:");
+        int opt = getopt(argc, argv, "ogdsn:t:");
         if (opt < 0)
             break;
         switch (opt)
@@ -141,6 +129,10 @@ int main(int argc, char **argv)
         case 'g':
             benchmark = 1;
             debugf("benchmarking enabled\n");
+            break;
+        case 'o':
+            optimize_ws = 1;
+            debugf("optimization enabled\n");
             break;
         case 's':
             serial = 1;
@@ -190,7 +182,8 @@ int main(int argc, char **argv)
     if (benchmark)
     {
         char *command = argv[0];
-        write_result_runtime(command, nthreads, delay);
+        char *filename = optimize_ws ? RUNTIME_OPTIMIZED_BENCHMARK_FILE : RUNTIME_BENCHMARK_FILE;
+        write_runtime_benchmark(filename, command, nthreads, delay);
     }
 
     for (int i = 0; i < n - 1; i++)

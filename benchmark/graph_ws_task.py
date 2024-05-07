@@ -14,7 +14,7 @@ def get_dict(filename):
             data_dict[index_thread] = [task_comp, task_ws_comp, task_ws_fail]
 
 
-get_dict('result.txt')
+get_dict('benchmark/ws_task.txt')
 
 threads = list(data_dict.keys())  # Indices des threads
 tasks_comp = [data[0] for data in data_dict.values()]  # task_comp
