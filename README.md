@@ -43,12 +43,12 @@ Plusieurs démonstrations sont disponibles:
 ### Options
 L'option `-d` permet l'affichage des messages de debug.  
 L'option `-g` permet de générer les fichiers de benchmark.   
-L'option `-o` permet de lancer la version optimisée du programme (pour l'ordonnanceur work stealing).
+L'option `-o` permet de lancer la version optimisée du programme (pour l'ordonnanceur work stealing).   
 L'option `-s` permet de lancer la version serial du programme.  
 L'option `-n <n>` permet de choisir le nombre `n` d'elements qui sera dans le tableau généré.  
 L'option `-t <n>` permet de choisir le nombre `n` de threads executé en parallèle. 
 
 ### Graphes
 
-Deux graphes de benchmark de comparaison entre l'ordonnanceur lifo et work stealing ont été réalisé dans le répertoire [benchmark/graph](https://gaufre.informatique.univ-paris-diderot.fr/dedeoglu/scheduler-lifo-work-stealing/tree/dev/benchmark/graph)
-grâce aux programmes python présent dans le répertoire [benchmark](https://gaufre.informatique.univ-paris-diderot.fr/dedeoglu/scheduler-lifo-work-stealing/tree/dev/benchmark).
+Les graphes de benchmark sont tous présents dans le répertoire [benchmark/graph](https://gaufre.informatique.univ-paris-diderot.fr/dedeoglu/scheduler-lifo-work-stealing/tree/dev/benchmark/graph)
+réalisé grâce aux programmes python présent dans le répertoire [benchmark](https://gaufre.informatique.univ-paris-diderot.fr/dedeoglu/scheduler-lifo-work-stealing/tree/dev/benchmark).
