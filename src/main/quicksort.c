@@ -6,6 +6,7 @@
 
 #include "sched.h"
 #include "utils.h"
+#include "benchmark.h"
 
 // int debug;
 
@@ -71,8 +72,6 @@ void quicksort_serial(int *a, int lo, int hi)
 
 void quicksort(void *closure, struct scheduler *s)
 {
-    // printf("quicksort\n");
-
     struct quicksort_args *args = (struct quicksort_args *)closure;
     int *a = args->a;
     int lo = args->lo;
@@ -93,28 +92,11 @@ void quicksort(void *closure, struct scheduler *s)
         return;
     }
 
-    // printf("avant partition\n");
     p = partition(a, lo, hi);
-    // printf("avant first sched spawn\n");
     rc = sched_spawn(quicksort, new_args(a, lo, p), s);
     assert(rc >= 0);
-    // printf("avant second sched spawn\n");
     rc = sched_spawn(quicksort, new_args(a, p + 1, hi), s);
     assert(rc >= 0);
-}
-
-int write_result_runtime(char *command, int nthreads, double runtime)
-{
-    FILE *f = fopen("benchmark/runtime.txt", "a");
-    if (f == NULL)
-    {
-        perror("fopen");
-        return -1;
-    }
-
-    fprintf(f, "%s %d %lf\n", command, nthreads, runtime);
-    fclose(f);
-    return 0;
 }
 
 int main(int argc, char **argv)
@@ -190,7 +172,7 @@ int main(int argc, char **argv)
     if (benchmark)
     {
         char *command = argv[0];
-        write_result_runtime(command, nthreads, delay);
+        write_runtime_benchmark(command, nthreads, delay);
     }
 
     for (int i = 0; i < n - 1; i++)

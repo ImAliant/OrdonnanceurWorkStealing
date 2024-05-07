@@ -7,6 +7,7 @@ TEST := $(SRC)/test
 
 QUICKSORT := $(MAIN)/quicksort.c
 UTILS := $(MAIN)/utils.c
+BENCHMARK := $(MAIN)/benchmark.c
 
 # LIFO
 LIFO := $(MAIN)/lifo
@@ -28,6 +29,10 @@ test_all: scheduler_test_lifo scheduler_test_ws
 test_lifo: scheduler_test_lifo
 test_ws: scheduler_test_ws
 
+demo: benchmark_comparaison_lifo_ws benchmark_work_stealing
+	python3 benchmark/graph_runtime_comparaison.py
+	python3 benchmark/graph_ws_task.py
+
 benchmark_comparaison_lifo_ws: scheduler_lifo scheduler_work_stealing
 	./scheduler_lifo -g -t 1
 	./scheduler_lifo -g -t 2
@@ -46,7 +51,7 @@ benchmark_comparaison_lifo_ws: scheduler_lifo scheduler_work_stealing
 	./scheduler_work_stealing -g -t 7
 	./scheduler_work_stealing -g -t 8
 
-benchmark_work_stealing: scheduler_work_stealing
+benchmark_work_stealing: scheduler_work_stealing $(BENCHMARK)
 	./scheduler_work_stealing -t 1
 	./scheduler_work_stealing -t 2
 	./scheduler_work_stealing -t 3
@@ -56,9 +61,9 @@ benchmark_work_stealing: scheduler_work_stealing
 	./scheduler_work_stealing -t 7
 	./scheduler_work_stealing -t 8
 
-scheduler_lifo: $(QUICKSORT) $(STACK) $(SCHED_LIFO) $(UTILS)
+scheduler_lifo: $(QUICKSORT) $(STACK) $(SCHED_LIFO) $(UTILS) $(BENCHMARK)
 	$(CC) $(CFLAGS) -o $@ $^
-scheduler_work_stealing: $(QUICKSORT) $(DEQUE) $(SCHED_WS) $(UTILS)
+scheduler_work_stealing: $(QUICKSORT) $(DEQUE) $(SCHED_WS) $(UTILS) $(BENCHMARK)
 	$(CC) $(CFLAGS) -o $@ $^
 scheduler_test_lifo: $(TEST_LIFO) $(STACK_TEST) $(UTILS)
 	$(CC) $(CFLAGS) -o $@ $^
@@ -67,3 +72,4 @@ scheduler_test_ws: $(TEST_WS) $(DEQUE_TEST) $(UTILS)
 
 clean:
 	rm -f scheduler_* src/*.o
+	rm -f benchmark/*.txt

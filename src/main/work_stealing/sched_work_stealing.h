@@ -2,7 +2,7 @@
 
 #include <pthread.h>
 
-struct benchmark
+struct benchmark_ws
 {
     int task_completed_count;
     int task_work_stealing_completed_count;
@@ -14,7 +14,7 @@ struct pthread_deque
     pthread_t thread;
     struct deque *deque;
 
-    struct benchmark benchmark;
+    struct benchmark_ws benchmark;
 };
 
 struct scheduler

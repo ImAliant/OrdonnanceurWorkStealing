@@ -1,7 +1,6 @@
 #include "sched_work_stealing.h"
 #include "deque.h"
 #include "../utils.h"
-#include "../benchmark.h"
 
 #include <pthread.h>
 #include <sys/mman.h>
@@ -15,6 +14,8 @@ int sched_init_deque(struct scheduler *, const size_t);
 int sched_launch_pthread(struct scheduler *);
 int sched_work_stealing(struct scheduler *, const int);
 int sched_normal_pop(struct scheduler *, const int);
+
+#define WS_TASK_BENCHMARK_FILE "benchmark/ws_task.txt"
 
 struct job_args
 {
@@ -320,16 +321,11 @@ int sched_spawn(taskfunc f, void *closure, struct scheduler *s)
     return 0;
 }
 
-int write_results(struct scheduler *s, int total_task_completed,
+int write_task_benchmark(struct scheduler *s, int total_task_completed,
                   int total_task_work_stealing_completed,
                   int total_task_work_stealing_failed)
 {
-    FILE *fp = fopen("benchmark/result.txt", "a");
-    if (fp == NULL)
-    {
-        fprintf(stderr, "Error opening file\n");
-        return 1;
-    }
+    FILE *fp = create_file(WS_TASK_BENCHMARK_FILE);
 
     for (int i = 0; i < s->nthreads; i++)
     {
@@ -369,7 +365,7 @@ int sched_stop(struct scheduler *s)
 
     if (benchmark)
     {
-        write_results(s, total_task_completed, total_task_work_stealing_completed, total_task_work_stealing_failed);
+        write_task_benchmark(s, total_task_completed, total_task_work_stealing_completed, total_task_work_stealing_failed);
     }
 
     munmap(s, sizeof(struct scheduler) + s->nthreads * sizeof(struct pthread_deque));

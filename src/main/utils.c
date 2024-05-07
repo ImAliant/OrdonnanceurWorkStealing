@@ -56,6 +56,18 @@ void *do_malloc(const size_t size)
     return mem;
 }
 
+FILE *create_file(const char *filename)
+{
+    FILE *fp = fopen(filename, "a");
+    if (fp == NULL)
+    {
+        fprintf(stderr, "Error opening file\n");
+        return NULL;
+    }
+
+    return fp;
+}
+
 void debugf(const char *format, ...)
 {
     va_list args;
