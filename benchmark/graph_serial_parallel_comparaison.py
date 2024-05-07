@@ -1,38 +1,43 @@
 import matplotlib.pyplot as plt
 
-runtime_serial = 0
-data_lifo = {}
-data_ws = {}
+serial_path = 'benchmark/serial.txt'
+parallel_lifo_path = 'benchmark/parallel_lifo.txt'
+parallel_ws_path = 'benchmark/parallel_ws.txt'
 
-file_path = 'benchmark/runtime.txt'
-with open(file_path, 'r') as file:
-    line = file.readline()
-    parts = line.strip().split()
-    runtime_serial = float(parts[2])
+serial_data = {}
+parallel_lifo_data = {}
+parallel_ws_data = {}
+
+def read_file(file_path, data):
+    with open(file_path, 'r') as file:
+        for line in file:
+            parts = line.strip().split()
+            array_size = int(parts[1])
+            duration = float(parts[2])
+            
+            data[array_size] = duration
     
-    for line in file:
-        parts = line.strip().split()
-        scheduler = parts[0].split('/')[-1]
-        thread_count = int(parts[1])
-        duration = float(parts[2])
+def create_graph():
+    array_sizes = sorted(serial_data.keys())
+    durations_serial = [serial_data[array_size] for array_size in array_sizes]
+    durations_lifo = [parallel_lifo_data[array_size] for array_size in array_sizes]
+    durations_ws = [parallel_ws_data[array_size] for array_size in array_sizes]
+    
+    plt.figure(figsize=(10, 6))
+    plt.plot(array_sizes, durations_serial, label='Serial Execution', linestyle='--')
+    plt.plot(array_sizes, durations_lifo, label='LIFO Scheduler', marker='o')
+    plt.plot(array_sizes, durations_ws, label='Work Stealing Scheduler', marker='x')
+    
+    plt.xlabel('Array Size')
+    plt.ylabel('Duration')
+    plt.title('Performance Comparison of Scheduling Strategies')
+    plt.legend()
+    plt.grid(True)
+    plt.show()        
 
-        if scheduler == 'scheduler_lifo':
-            data_lifo[thread_count] = duration
-        elif scheduler == 'scheduler_work_stealing':
-            data_ws[thread_count] = duration
-
-threads = sorted(data_lifo.keys())
-durations_lifo = [data_lifo[thread] for thread in threads]
-duration_ws = [data_ws[thread] for thread in threads]
-
-plt.figure(figsize=(10, 6))
-plt.plot(threads, [runtime_serial] * len(threads), label='Serial Execution', linestyle='--')
-plt.plot(threads, durations_lifo, label='LIFO Scheduler', marker='o')
-plt.plot(threads, duration_ws, label='Work Stealing Scheduler', marker='x')
-
-plt.xlabel('Number of Threads')
-plt.ylabel('Duration')
-plt.title('Performance Comparison of Scheduling Strategies')
-plt.legend()
-plt.grid(True)
-plt.show()
+if __name__ == '__main__':
+    read_file(serial_path, serial_data)
+    read_file(parallel_lifo_path, parallel_lifo_data)
+    read_file(parallel_ws_path, parallel_ws_data)
+    
+    create_graph()

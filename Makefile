@@ -43,7 +43,7 @@ demo: clean benchmark_comparaison_lifo_ws
 demo_optimization: clean benchmark_ws_optimization
 	python3 $(WS_OPTIMIZATION)
 
-demo_serial_parallel: clean benchmark_serial_parallel
+demo_serial_parallel:
 	python3 $(SERIAL_PARALLEL_COMPARISON)
 
 benchmark_comparaison_lifo_ws: scheduler_lifo scheduler_work_stealing
@@ -92,3 +92,4 @@ clean:
 	rm -f scheduler_* src/*.o
 	rm -f benchmark/runtime.txt
 	rm -f benchmark/ws_task.txt
+	rm -f benchmark/serial_parallel.txt

@@ -10,6 +10,7 @@
 
 #define RUNTIME_BENCHMARK_FILE "benchmark/runtime.txt"
 #define RUNTIME_OPTIMIZED_BENCHMARK_FILE "benchmark/runtime_optimized.txt"
+#define SERIAL_PARALLEL_BENCHMARK_FILE "benchmark/serial_parallel.txt"
 
 #define NORMAL_QUICKSORT_THRESHOLD 128
 #define OPTIMIZED_QUICKSORT_THRESHOLD 1024
@@ -184,6 +185,9 @@ int main(int argc, char **argv)
         char *command = argv[0];
         char *filename = optimize_ws ? RUNTIME_OPTIMIZED_BENCHMARK_FILE : RUNTIME_BENCHMARK_FILE;
         write_runtime_benchmark(filename, command, nthreads, delay);
+
+        filename = SERIAL_PARALLEL_BENCHMARK_FILE;
+        write_serial_parallel_benchmark(filename, command, n, delay);
     }
 
     for (int i = 0; i < n - 1; i++)
