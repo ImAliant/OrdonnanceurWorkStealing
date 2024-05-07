@@ -71,6 +71,14 @@ benchmark_serial_parallel: scheduler_lifo scheduler_work_stealing
 		./scheduler_work_stealing -g -t $$t; \
 	done
 
+benchmark_os: scheduler_lifo scheduler_work_stealing
+	@for t in $$(seq 1 8); do \
+		./scheduler_lifo -g -t $$t; \
+	done
+	@for t in $$(seq 1 8); do \
+		./scheduler_work_stealing -g -t $$t; \
+	done
+
 scheduler_lifo: $(QUICKSORT) $(STACK) $(SCHED_LIFO) $(UTILS) $(BENCHMARK)
 	$(CC) $(CFLAGS) -o $@ $^
 scheduler_work_stealing: $(QUICKSORT) $(DEQUE) $(SCHED_WS) $(UTILS) $(BENCHMARK)
