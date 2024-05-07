@@ -2,6 +2,7 @@ CC := gcc
 CFLAGS := -Wall -O2 -pthread
 DEBUG := -g -fsanitize=address
 SRC := src
+BENCH := benchmark
 MAIN := $(SRC)/main
 TEST := $(SRC)/test
 
@@ -23,65 +24,52 @@ DEQUE_TEST := $(TEST)/deque_test.c
 SCHED_WS := $(WS)/sched_work_stealing.c
 TEST_WS := $(TEST)/test_ws.c
 
+# FILES
+LIFO_WS_COMPARISON := $(BENCH)/graph_runtime_comparaison.py
+WS_TASK := $(BENCH)/graph_ws_task.py
+WS_OPTIMIZATION := $(BENCH)/graph_ws_optimization.py
+SERIAL_PARALLEL_COMPARISON := $(BENCH)/graph_serial_parallel_comparaison.py
+
 all: scheduler_lifo scheduler_work_stealing
 
 test_all: scheduler_test_lifo scheduler_test_ws
 test_lifo: scheduler_test_lifo
 test_ws: scheduler_test_ws
 
-demo: clean benchmark_comparaison_lifo_ws benchmark_work_stealing
-	python3 benchmark/graph_runtime_comparaison.py
-	python3 benchmark/graph_ws_task.py
+demo: clean benchmark_comparaison_lifo_ws
+	python3 $(LIFO_WS_COMPARISON)
+	python3 $(WS_TASK)
 
 demo_optimization: clean benchmark_ws_optimization
-	python3 benchmark/graph_ws_optimization.py
+	python3 $(WS_OPTIMIZATION)
+
+demo_serial_parallel: clean benchmark_serial_parallel
+	python3 $(SERIAL_PARALLEL_COMPARISON)
 
 benchmark_comparaison_lifo_ws: scheduler_lifo scheduler_work_stealing
-	./scheduler_lifo -g -t 1
-	./scheduler_lifo -g -t 2
-	./scheduler_lifo -g -t 3
-	./scheduler_lifo -g -t 4
-	./scheduler_lifo -g -t 5
-	./scheduler_lifo -g -t 6
-	./scheduler_lifo -g -t 7
-	./scheduler_lifo -g -t 8
-	./scheduler_work_stealing -g -t 1
-	./scheduler_work_stealing -g -t 2
-	./scheduler_work_stealing -g -t 3
-	./scheduler_work_stealing -g -t 4
-	./scheduler_work_stealing -g -t 5
-	./scheduler_work_stealing -g -t 6
-	./scheduler_work_stealing -g -t 7
-	./scheduler_work_stealing -g -t 8
+	@for t in $$(seq 1 8); do \
+		./scheduler_lifo -g -t $$t; \
+	done
+	@for t in $$(seq 1 8); do \
+		./scheduler_work_stealing -g -t $$t; \
+	done
 
 benchmark_ws_optimization: scheduler_work_stealing
-	./scheduler_work_stealing -g -t 1
-	./scheduler_work_stealing -g -t 2
-	./scheduler_work_stealing -g -t 3
-	./scheduler_work_stealing -g -t 4
-	./scheduler_work_stealing -g -t 5
-	./scheduler_work_stealing -g -t 6
-	./scheduler_work_stealing -g -t 7
-	./scheduler_work_stealing -g -t 8
+	@for t in $$(seq 1 8); do \
+		./scheduler_work_stealing -g -t $$t; \
+	done
+	@for t in $$(seq 1 8); do \
+		./scheduler_work_stealing -g -o -t $$t; \
+	done
 
-	./scheduler_work_stealing -g -o -t 1
-	./scheduler_work_stealing -g -o -t 2
-	./scheduler_work_stealing -g -o -t 3
-	./scheduler_work_stealing -g -o -t 4
-	./scheduler_work_stealing -g -o -t 5
-	./scheduler_work_stealing -g -o -t 6
-	./scheduler_work_stealing -g -o -t 7
-	./scheduler_work_stealing -g -o -t 8
-
-benchmark_work_stealing: scheduler_work_stealing
-	./scheduler_work_stealing -t 1
-	./scheduler_work_stealing -t 2
-	./scheduler_work_stealing -t 3
-	./scheduler_work_stealing -t 4
-	./scheduler_work_stealing -t 5
-	./scheduler_work_stealing -t 6
-	./scheduler_work_stealing -t 7
-	./scheduler_work_stealing -t 8
+benchmark_serial_parallel: scheduler_lifo scheduler_work_stealing
+	./scheduler_lifo -g -s
+	@for t in $$(seq 1 8); do \
+		./scheduler_lifo -g -t $$t; \
+	done
+	@for t in $$(seq 1 8); do \
+		./scheduler_work_stealing -g -t $$t; \
+	done
 
 scheduler_lifo: $(QUICKSORT) $(STACK) $(SCHED_LIFO) $(UTILS) $(BENCHMARK)
 	$(CC) $(CFLAGS) -o $@ $^
