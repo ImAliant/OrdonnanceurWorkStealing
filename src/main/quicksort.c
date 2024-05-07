@@ -11,6 +11,10 @@
 #define RUNTIME_BENCHMARK_FILE "benchmark/runtime.txt"
 #define RUNTIME_OPTIMIZED_BENCHMARK_FILE "benchmark/runtime_optimized.txt"
 
+#define NORMAL_QUICKSORT_THRESHOLD 128
+#define OPTIMIZED_QUICKSORT_THRESHOLD 1024
+#define DEFAULT_SIZE_ARRAY 10 * 1024 * 1024
+
 int partition(int *a, int lo, int hi)
 {
     int pivot = a[lo];
@@ -87,7 +91,8 @@ void quicksort(void *closure, struct scheduler *s)
         return;
     }
 
-    if (hi - lo <= 128)
+    int threshold = optimize_ws ? OPTIMIZED_QUICKSORT_THRESHOLD : NORMAL_QUICKSORT_THRESHOLD;
+    if (hi - lo <= threshold)
     {
         quicksort_serial(a, lo, hi);
         return;
@@ -106,7 +111,7 @@ int main(int argc, char **argv)
     struct timespec begin, end;
     double delay;
     int rc;
-    int n = 10 * 1024 * 1024;
+    int n = DEFAULT_SIZE_ARRAY;
     int nthreads = -1;
     int serial = 0;
 
