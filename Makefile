@@ -90,4 +90,5 @@ scheduler_test_ws: $(TEST_WS) $(DEQUE_TEST) $(UTILS)
 
 clean:
 	rm -f scheduler_* src/*.o
-	rm -f benchmark/*.txt
+	rm -f benchmark/runtime.txt
+	rm -f benchmark/ws_task.txt
