@@ -69,11 +69,6 @@ FILE *create_file(const char *filename)
     return fp;
 }
 
-/**
- * @brief Print debug message to stderr
- * 
- * @param format 
- */
 void debugf(const char *format, ...)
 {
     va_list args;
