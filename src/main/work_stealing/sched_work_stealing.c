@@ -16,6 +16,7 @@ int sched_work_stealing(struct scheduler *, const int);
 int sched_normal_pop(struct scheduler *, const int);
 
 #define WS_TASK_BENCHMARK_FILE "benchmark/ws_task.txt"
+#define DEFAULT_WAITING_TIME 500
 
 struct job_args
 {
@@ -107,16 +108,25 @@ void *job(void *arg)
                 }
                 pthread_mutex_unlock(&s->mutex);
 
-                usleep(1000);
+                if (optimize_ws) {
+                    s->threads[index].waiting_time *= 2;
+                }
+
+                usleep(s->threads[index].waiting_time);
 
                 pthread_mutex_lock(&s->mutex);
                 s->asleep_threads--;
                 pthread_mutex_unlock(&s->mutex);
+            } else {
+                if (optimize_ws) {
+                    s->threads[index].waiting_time = DEFAULT_WAITING_TIME;
+                }
             }
         }
     }
     return NULL;
 }
+
 
 int increment_k(int k, int nthreads)
 {
@@ -254,6 +264,7 @@ int sched_init_deque(struct scheduler *s, const size_t index_dep)
         {
             exit(EXIT_FAILURE);
         }
+        s->threads[i].waiting_time = DEFAULT_WAITING_TIME;
     }
 
     return 0;

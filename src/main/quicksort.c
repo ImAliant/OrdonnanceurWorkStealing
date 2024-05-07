@@ -8,7 +8,8 @@
 #include "utils.h"
 #include "benchmark.h"
 
-// int debug;
+#define RUNTIME_BENCHMARK_FILE "benchmark/runtime.txt"
+#define RUNTIME_OPTIMIZED_BENCHMARK_FILE "benchmark/runtime_optimized.txt"
 
 int partition(int *a, int lo, int hi)
 {
@@ -111,7 +112,7 @@ int main(int argc, char **argv)
 
     while (1)
     {
-        int opt = getopt(argc, argv, "gdsn:t:");
+        int opt = getopt(argc, argv, "ogdsn:t:");
         if (opt < 0)
             break;
         switch (opt)
@@ -123,6 +124,10 @@ int main(int argc, char **argv)
         case 'g':
             benchmark = 1;
             debugf("benchmarking enabled\n");
+            break;
+        case 'o':
+            optimize_ws = 1;
+            debugf("optimization enabled\n");
             break;
         case 's':
             serial = 1;
@@ -172,7 +177,8 @@ int main(int argc, char **argv)
     if (benchmark)
     {
         char *command = argv[0];
-        write_runtime_benchmark(command, nthreads, delay);
+        char *filename = optimize_ws ? RUNTIME_OPTIMIZED_BENCHMARK_FILE : RUNTIME_BENCHMARK_FILE;
+        write_runtime_benchmark(filename, command, nthreads, delay);
     }
 
     for (int i = 0; i < n - 1; i++)

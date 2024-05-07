@@ -29,9 +29,12 @@ test_all: scheduler_test_lifo scheduler_test_ws
 test_lifo: scheduler_test_lifo
 test_ws: scheduler_test_ws
 
-demo: benchmark_comparaison_lifo_ws benchmark_work_stealing
+demo: clean benchmark_comparaison_lifo_ws benchmark_work_stealing
 	python3 benchmark/graph_runtime_comparaison.py
 	python3 benchmark/graph_ws_task.py
+
+demo_optimization: clean benchmark_ws_optimization
+	python3 benchmark/graph_ws_optimization.py
 
 benchmark_comparaison_lifo_ws: scheduler_lifo scheduler_work_stealing
 	./scheduler_lifo -g -t 1
@@ -51,7 +54,26 @@ benchmark_comparaison_lifo_ws: scheduler_lifo scheduler_work_stealing
 	./scheduler_work_stealing -g -t 7
 	./scheduler_work_stealing -g -t 8
 
-benchmark_work_stealing: scheduler_work_stealing $(BENCHMARK)
+benchmark_ws_optimization: scheduler_work_stealing
+	./scheduler_work_stealing -g -t 1
+	./scheduler_work_stealing -g -t 2
+	./scheduler_work_stealing -g -t 3
+	./scheduler_work_stealing -g -t 4
+	./scheduler_work_stealing -g -t 5
+	./scheduler_work_stealing -g -t 6
+	./scheduler_work_stealing -g -t 7
+	./scheduler_work_stealing -g -t 8
+
+	./scheduler_work_stealing -g -o -t 1
+	./scheduler_work_stealing -g -o -t 2
+	./scheduler_work_stealing -g -o -t 3
+	./scheduler_work_stealing -g -o -t 4
+	./scheduler_work_stealing -g -o -t 5
+	./scheduler_work_stealing -g -o -t 6
+	./scheduler_work_stealing -g -o -t 7
+	./scheduler_work_stealing -g -o -t 8
+
+benchmark_work_stealing: scheduler_work_stealing
 	./scheduler_work_stealing -t 1
 	./scheduler_work_stealing -t 2
 	./scheduler_work_stealing -t 3

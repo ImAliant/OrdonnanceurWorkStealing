@@ -7,7 +7,6 @@
 #include <unistd.h>
 #include <sys/mman.h>
 #include <errno.h>
-#include <pthread.h>
 
 int sched_launch_threads(struct scheduler *s, taskfunc f, void *closure);
 

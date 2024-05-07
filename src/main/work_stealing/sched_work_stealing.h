@@ -13,6 +13,7 @@ struct pthread_deque
 {
     pthread_t thread;
     struct deque *deque;
+    int waiting_time;
 
     struct benchmark_ws benchmark;
 };

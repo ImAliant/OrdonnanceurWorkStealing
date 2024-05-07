@@ -7,6 +7,7 @@
 
 int debug = 0;
 int benchmark = 0;
+int optimize_ws = 0;
 
 void *do_mmap(const size_t size, const int prot, const int flags)
 {
@@ -68,6 +69,11 @@ FILE *create_file(const char *filename)
     return fp;
 }
 
+/**
+ * @brief Print debug message to stderr
+ * 
+ * @param format 
+ */
 void debugf(const char *format, ...)
 {
     va_list args;

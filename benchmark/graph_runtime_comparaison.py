@@ -5,7 +5,7 @@ data_lifo = {}
 data_work_stealing = {}
 
 # Lire le fichier
-file_path = 'benchmark/ws_lifo_runtime.txt'  # Mettez ici le chemin correct du fichier
+file_path = 'benchmark/runtime.txt'  # Mettez ici le chemin correct du fichier
 with open(file_path, 'r') as file:
     for line in file:
         parts = line.strip().split()
