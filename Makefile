@@ -32,10 +32,6 @@ SERIAL_PARALLEL_COMPARISON := $(BENCH)/graph_serial_parallel_comparaison.py
 
 all: scheduler_lifo scheduler_work_stealing
 
-test_all: scheduler_test_lifo scheduler_test_ws
-test_lifo: scheduler_test_lifo
-test_ws: scheduler_test_ws
-
 demo: clean benchmark_comparaison_lifo_ws
 	python3 $(LIFO_WS_COMPARISON)
 	python3 $(WS_TASK)

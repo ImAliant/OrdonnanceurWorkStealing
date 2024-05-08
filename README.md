@@ -38,7 +38,7 @@ Plusieurs démonstrations sont disponibles:
     - un graphe de comparaison de temps d'execution entre l'ordonnanceur LIFO et Work Stealing
     - un graphe affichant les taches executées par chaque thread, les taches volées ratées et les taches volées réussies.
 - `make demo_optimization` pour afficher un graphe de comparaison de temps d'execution entre la version optimisée et non optimisée de l'ordonnanceur Work Stealing.
-- `make demo_serial` pour afficher un graphe de comparaison de temps entre la version sérial du quicksort et les deux ordonnanceurs en fonction du nombre de threads.
+- `make demo_serial_parallel` pour afficher un graphe de comparaison de temps entre la version sérial du quicksort et les deux ordonnanceurs en fonction du nombre d'éléments dans le tableau.
 
 ### Options
 L'option `-d` permet l'affichage des messages de debug.  
