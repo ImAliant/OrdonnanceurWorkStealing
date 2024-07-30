@@ -3,26 +3,41 @@
 #include <unistd.h>
 #include <time.h>
 #include <assert.h>
-#include "sched.h"
 
-int
-partition(int *a, int lo, int hi)
+#include "sched.h"
+#include "utils.h"
+#include "benchmark.h"
+
+#define RUNTIME_BENCHMARK_FILE "benchmark/runtime.txt"
+#define RUNTIME_OPTIMIZED_BENCHMARK_FILE "benchmark/runtime_optimized.txt"
+#define SERIAL_PARALLEL_BENCHMARK_FILE "benchmark/serial_parallel.txt"
+
+#define NORMAL_QUICKSORT_THRESHOLD 128
+#define OPTIMIZED_QUICKSORT_THRESHOLD 1024
+#define DEFAULT_SIZE_ARRAY 10 * 1024 * 1024
+
+int partition(int *a, int lo, int hi)
 {
     int pivot = a[lo];
     int i = lo - 1;
     int j = hi + 1;
     int t;
-    while(1) {
-        do {
+    while (1)
+    {
+        do
+        {
             i++;
-        } while(a[i] < pivot);
+        } while (a[i] < pivot);
 
-        do {
+        do
+        {
             j--;
-        } while(a[j] > pivot);
+        } while (a[j] > pivot);
 
-        if(i >= j)
+        if (i >= j)
+        {
             return j;
+        }
 
         t = a[i];
         a[i] = a[j];
@@ -30,7 +45,8 @@ partition(int *a, int lo, int hi)
     }
 }
 
-struct quicksort_args {
+struct quicksort_args
+{
     int *a;
     int lo, hi;
 };
@@ -39,7 +55,7 @@ struct quicksort_args *
 new_args(int *a, int lo, int hi)
 {
     struct quicksort_args *args = malloc(sizeof(struct quicksort_args));
-    if(args == NULL)
+    if (args == NULL)
         return NULL;
 
     args->a = a;
@@ -48,12 +64,11 @@ new_args(int *a, int lo, int hi)
     return args;
 }
 
-void
-quicksort_serial(int *a, int lo, int hi)
+void quicksort_serial(int *a, int lo, int hi)
 {
     int p;
 
-    if(lo >= hi)
+    if (lo >= hi)
         return;
 
     p = partition(a, lo, hi);
@@ -61,8 +76,7 @@ quicksort_serial(int *a, int lo, int hi)
     quicksort_serial(a, p + 1, hi);
 }
 
-void
-quicksort(void *closure, struct scheduler *s)
+void quicksort(void *closure, struct scheduler *s)
 {
     struct quicksort_args *args = (struct quicksort_args *)closure;
     int *a = args->a;
@@ -73,10 +87,14 @@ quicksort(void *closure, struct scheduler *s)
 
     free(closure);
 
-    if(lo >= hi)
+    if (lo >= hi)
+    {
         return;
+    }
 
-    if(hi - lo <= 128) {
+    int threshold = optimize_ws ? OPTIMIZED_QUICKSORT_THRESHOLD : NORMAL_QUICKSORT_THRESHOLD;
+    if (hi - lo <= threshold)
+    {
         quicksort_serial(a, lo, hi);
         return;
     }
@@ -88,33 +106,46 @@ quicksort(void *closure, struct scheduler *s)
     assert(rc >= 0);
 }
 
-int
-main(int argc, char **argv)
+int main(int argc, char **argv)
 {
     int *a;
     struct timespec begin, end;
     double delay;
     int rc;
-    int n = 10 * 1024 * 1024;
+    int n = DEFAULT_SIZE_ARRAY;
     int nthreads = -1;
     int serial = 0;
 
-    while(1) {
-        int opt = getopt(argc, argv, "sn:t:");
-        if(opt < 0)
+    while (1)
+    {
+        int opt = getopt(argc, argv, "ogdsn:t:");
+        if (opt < 0)
             break;
-        switch(opt) {
+        switch (opt)
+        {
+        case 'd':
+            debug = 1;
+            debugf("debugging enabled\n");
+            break;
+        case 'g':
+            benchmark = 1;
+            debugf("benchmarking enabled\n");
+            break;
+        case 'o':
+            optimize_ws = 1;
+            debugf("optimization enabled\n");
+            break;
         case 's':
             serial = 1;
             break;
         case 'n':
             n = atoi(optarg);
-            if(n <= 0)
+            if (n <= 0)
                 goto usage;
             break;
         case 't':
             nthreads = atoi(optarg);
-            if(nthreads <= 0)
+            if (nthreads <= 0)
                 goto usage;
             break;
         default:
@@ -125,16 +156,20 @@ main(int argc, char **argv)
     a = malloc(n * sizeof(int));
 
     unsigned long long s = 0;
-    for(int i = 0; i < n; i++) {
+    for (int i = 0; i < n; i++)
+    {
         s = s * 6364136223846793005ULL + 1442695040888963407;
         a[i] = (int)((s >> 33) & 0x7FFFFFFF);
     }
 
     clock_gettime(CLOCK_MONOTONIC, &begin);
 
-    if(serial) {
+    if (serial)
+    {
         quicksort_serial(a, 0, n - 1);
-    } else {
+    }
+    else
+    {
         rc = sched_init(nthreads, (n + 127) / 128,
                         quicksort, new_args(a, 0, n - 1));
         assert(rc >= 0);
@@ -142,17 +177,28 @@ main(int argc, char **argv)
 
     clock_gettime(CLOCK_MONOTONIC, &end);
     delay = end.tv_sec + end.tv_nsec / 1000000000.0 -
-        (begin.tv_sec + begin.tv_nsec / 1000000000.0);
+            (begin.tv_sec + begin.tv_nsec / 1000000000.0);
     printf("Done in %lf seconds.\n", delay);
 
-    for(int i = 0; i < n - 1; i++) {
+    if (benchmark)
+    {
+        char *command = argv[0];
+        char *filename = optimize_ws ? RUNTIME_OPTIMIZED_BENCHMARK_FILE : RUNTIME_BENCHMARK_FILE;
+        write_runtime_benchmark(filename, command, nthreads, delay);
+
+        filename = SERIAL_PARALLEL_BENCHMARK_FILE;
+        write_serial_parallel_benchmark(filename, command, n, delay);
+    }
+
+    for (int i = 0; i < n - 1; i++)
+    {
         assert(a[i] <= a[i + 1]);
     }
 
     free(a);
     return 0;
 
- usage:
+usage:
     printf("quicksort [-n size] [-t threads] [-s]\n");
     return 1;
 }
